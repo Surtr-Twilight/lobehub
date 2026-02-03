@@ -269,6 +269,35 @@ describe('AgentRuntimeService', () => {
 
       await expect(service.createOperation(mockParams)).rejects.toThrow('Database error');
     });
+
+    it('should pass maxSteps to initial state when provided', async () => {
+      mockQueueService.scheduleMessage.mockResolvedValueOnce('message-123');
+
+      await service.createOperation({ ...mockParams, maxSteps: 25 });
+
+      expect(mockCoordinator.saveAgentState).toHaveBeenCalledWith(
+        'test-operation-1',
+        expect.objectContaining({
+          maxSteps: 25,
+        }),
+      );
+    });
+
+    it('should pass evalContext to metadata when provided', async () => {
+      mockQueueService.scheduleMessage.mockResolvedValueOnce('message-123');
+
+      const evalContext = { envPrompt: 'You are in a test environment' };
+      await service.createOperation({ ...mockParams, evalContext });
+
+      expect(mockCoordinator.saveAgentState).toHaveBeenCalledWith(
+        'test-operation-1',
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            evalContext,
+          }),
+        }),
+      );
+    });
   });
 
   describe('executeStep', () => {
@@ -504,6 +533,36 @@ describe('AgentRuntimeService', () => {
 
       expect(result.success).toBe(true);
       expect(result.nextStepScheduled).toBe(false); // Should not schedule next step when status is 'done'
+    });
+
+    it('should detect interruption that occurred during step execution', async () => {
+      const mockStepResult = {
+        newState: { ...mockState, stepCount: 2, status: 'running' },
+        nextContext: mockParams.context,
+        events: [],
+      };
+
+      const mockRuntime = { step: vi.fn().mockResolvedValue(mockStepResult) };
+      vi.spyOn(service as any, 'createAgentRuntime').mockReturnValue({ runtime: mockRuntime });
+
+      // First call returns running state (for executeStep's initial load),
+      // second call returns interrupted state (checked after runtime.step completes)
+      mockCoordinator.loadAgentState
+        .mockResolvedValueOnce(mockState) // initial load
+        .mockResolvedValueOnce({ ...mockState, status: 'interrupted' }); // post-step check
+
+      const result = await service.executeStep(mockParams);
+
+      // The step result should reflect the interrupted status
+      expect(result.state).toEqual(expect.objectContaining({ status: 'interrupted' }));
+      expect(result.nextStepScheduled).toBe(false);
+      // saveStepResult should be called with interrupted state
+      expect(mockCoordinator.saveStepResult).toHaveBeenCalledWith(
+        'test-operation-1',
+        expect.objectContaining({
+          newState: expect.objectContaining({ status: 'interrupted' }),
+        }),
+      );
     });
   });
 
@@ -900,12 +959,24 @@ describe('AgentRuntimeService', () => {
         expect(shouldContinue).toBe(false);
       });
 
-      it('should return false when max steps reached', () => {
+      it('should not check maxSteps — delegated to runtime.step()', () => {
+        // maxSteps is handled by runtime.step() which sets forceFinish → status:'done'
+        // shouldContinueExecution only checks status, not maxSteps
         const shouldContinue = (service as any).shouldContinueExecution(
           { status: 'running', maxSteps: 10, stepCount: 10 },
           { phase: 'user_input' },
         );
-        expect(shouldContinue).toBe(false);
+        expect(shouldContinue).toBe(true);
+      });
+
+      it('should continue when forceFinish is active even at maxSteps', () => {
+        // When runtime sets forceFinish, the service must allow one more step
+        // for the LLM to produce a final text response without tools
+        const shouldContinue = (service as any).shouldContinueExecution(
+          { status: 'running', maxSteps: 5, stepCount: 6, forceFinish: true },
+          { phase: 'llm_result' },
+        );
+        expect(shouldContinue).toBe(true);
       });
 
       it('should return false when cost limit exceeded with stop action', () => {
@@ -996,6 +1067,92 @@ describe('AgentRuntimeService', () => {
         });
         expect(priority).toBe('normal');
       });
+    });
+  });
+
+  describe('interruptOperation', () => {
+    it('should interrupt a running operation', async () => {
+      mockCoordinator.loadAgentState.mockResolvedValue({
+        operationId: 'op-1',
+        status: 'running',
+        stepCount: 3,
+        lastModified: new Date().toISOString(),
+      });
+
+      const result = await service.interruptOperation('op-1');
+
+      expect(result).toBe(true);
+      expect(mockCoordinator.saveAgentState).toHaveBeenCalledWith(
+        'op-1',
+        expect.objectContaining({
+          status: 'interrupted',
+          lastModified: expect.any(String),
+        }),
+      );
+    });
+
+    it('should interrupt a waiting_for_human operation', async () => {
+      mockCoordinator.loadAgentState.mockResolvedValue({
+        operationId: 'op-2',
+        status: 'waiting_for_human',
+        stepCount: 1,
+      });
+
+      const result = await service.interruptOperation('op-2');
+
+      expect(result).toBe(true);
+      expect(mockCoordinator.saveAgentState).toHaveBeenCalledWith(
+        'op-2',
+        expect.objectContaining({ status: 'interrupted' }),
+      );
+    });
+
+    it('should return false when state not found', async () => {
+      mockCoordinator.loadAgentState.mockResolvedValue(null);
+
+      const result = await service.interruptOperation('non-existent');
+
+      expect(result).toBe(false);
+      expect(mockCoordinator.saveAgentState).not.toHaveBeenCalled();
+    });
+
+    it('should return false when operation already done', async () => {
+      mockCoordinator.loadAgentState.mockResolvedValue({
+        operationId: 'op-done',
+        status: 'done',
+        stepCount: 5,
+      });
+
+      const result = await service.interruptOperation('op-done');
+
+      expect(result).toBe(false);
+      expect(mockCoordinator.saveAgentState).not.toHaveBeenCalled();
+    });
+
+    it('should return false when operation already in error state', async () => {
+      mockCoordinator.loadAgentState.mockResolvedValue({
+        operationId: 'op-err',
+        status: 'error',
+        stepCount: 2,
+      });
+
+      const result = await service.interruptOperation('op-err');
+
+      expect(result).toBe(false);
+      expect(mockCoordinator.saveAgentState).not.toHaveBeenCalled();
+    });
+
+    it('should return false when operation already interrupted', async () => {
+      mockCoordinator.loadAgentState.mockResolvedValue({
+        operationId: 'op-int',
+        status: 'interrupted',
+        stepCount: 4,
+      });
+
+      const result = await service.interruptOperation('op-int');
+
+      expect(result).toBe(false);
+      expect(mockCoordinator.saveAgentState).not.toHaveBeenCalled();
     });
   });
 });
