@@ -1,18 +1,14 @@
 'use client';
 
-import { BUILTIN_AGENT_SLUGS } from '@lobechat/builtin-agents';
 import { EditorProvider } from '@lobehub/editor/react';
 import { Flexbox } from '@lobehub/ui';
 import { cssVar } from 'antd-style';
 import type { FC } from 'react';
 import { memo, useEffect } from 'react';
 
-import Loading from '@/components/Loading/BrandTextLoading';
 import DiffAllToolbar from '@/features/EditorCanvas/DiffAllToolbar';
 import WideScreenContainer from '@/features/WideScreenContainer';
 import { useRegisterFilesHotkeys } from '@/hooks/useHotkeys';
-import { useAgentStore } from '@/store/agent';
-import { builtinAgentSelectors } from '@/store/agent/selectors';
 import { useDocumentStore } from '@/store/document';
 import { editorSelectors } from '@/store/document/slices/editor';
 import { usePageStore } from '@/store/page';
@@ -21,7 +17,7 @@ import { StyleSheet } from '@/utils/styles';
 import Copilot from './Copilot';
 import EditorCanvas from './EditorCanvas';
 import Header from './Header';
-import PageAgentProvider from './PageAgentProvider';
+import { PageAgentProvider } from './PageAgentProvider';
 import { PageEditorProvider } from './PageEditorProvider';
 import PageTitle from './PageTitle';
 import { usePageEditorStore } from './store';
@@ -129,17 +125,10 @@ export const PageEditor: FC<PageEditorProps> = ({
   title,
   emoji,
 }) => {
-  const useInitBuiltinAgent = useAgentStore((s) => s.useInitBuiltinAgent);
-  const pageAgentId = useAgentStore(builtinAgentSelectors.pageAgentId);
-
-  useInitBuiltinAgent(BUILTIN_AGENT_SLUGS.pageAgent);
-
   const deletePage = usePageStore((s) => s.deletePage);
 
-  if (!pageAgentId) return <Loading debugId="PageEditor > PageAgent Init" />;
-
   return (
-    <PageAgentProvider pageAgentId={pageAgentId}>
+    <PageAgentProvider>
       <EditorProvider>
         <PageEditorProvider
           emoji={emoji}

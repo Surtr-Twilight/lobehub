@@ -12,13 +12,10 @@ export const useStyles = createStaticStyles(({ css, cssVar }) => ({
     }
   `,
   container: css`
-    overflow: auto hidden;
     flex: 1;
     min-width: 0;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
+    border-radius: 0;
+    background: transparent;
   `,
   tab: css`
     cursor: default;
@@ -29,12 +26,14 @@ export const useStyles = createStaticStyles(({ css, cssVar }) => ({
     overflow: hidden;
     flex-shrink: 0;
 
-    max-width: 180px;
+    width: 180px;
     padding-block: 2px;
     padding-inline: 10px;
     border-radius: ${cssVar.borderRadiusSM};
 
     font-size: 12px;
+
+    background-color: ${cssVar.colorFillTertiary};
 
     transition: background-color 0.15s ${cssVar.motionEaseInOut};
 
@@ -47,10 +46,10 @@ export const useStyles = createStaticStyles(({ css, cssVar }) => ({
     }
   `,
   tabActive: css`
-    background-color: ${cssVar.colorFillTertiary};
+    background-color: ${cssVar.colorFillSecondary};
 
     &:hover {
-      background-color: ${cssVar.colorFillSecondary};
+      background-color: ${cssVar.colorFill};
     }
 
     & .closeIcon {
