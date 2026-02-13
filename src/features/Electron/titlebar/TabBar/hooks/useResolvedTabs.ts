@@ -24,7 +24,8 @@ export const useResolvedTabs = (): UseResolvedTabsResult => {
     for (const ref of tabRefs) {
       const resolved = pluginRegistry.resolve(ref, ctx);
       if (resolved) {
-        results.push(resolved);
+        const cachedTitle = ref.cached?.title;
+        results.push(cachedTitle ? { ...resolved, title: cachedTitle } : resolved);
       }
     }
     return results;

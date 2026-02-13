@@ -56,6 +56,7 @@ export const agentTopicPlugin: RecentlyViewedPlugin<'agent-topic'> = {
     const { agentId, topicId } = reference.params;
     const agentMeta = ctx.getAgentMeta(agentId);
     const topic = ctx.getTopic(topicId);
+
     const cached = reference.cached;
 
     const agentExists = agentMeta !== undefined && Object.keys(agentMeta).length > 0;
