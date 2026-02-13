@@ -6,11 +6,12 @@ import { memo, Suspense, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isDesktop } from '@/const/version';
+import { pluginRegistry } from '@/features/Electron/titlebar/RecentlyViewed/plugins';
 import NavItem from '@/features/NavPanel/components/NavItem';
 import { useAgentStore } from '@/store/agent';
 import { useChatStore } from '@/store/chat';
 import { operationSelectors } from '@/store/chat/selectors';
-import { useGlobalStore } from '@/store/global';
+import { useElectronStore } from '@/store/electron';
 
 import { useTopicNavigation } from '../../hooks/useTopicNavigation';
 import ThreadList from '../../TopicListContent/ThreadList';
@@ -54,8 +55,8 @@ interface TopicItemProps {
 
 const TopicItem = memo<TopicItemProps>(({ id, title, fav, active, threadId }) => {
   const { t } = useTranslation('topic');
-  const openTopicInNewWindow = useGlobalStore((s) => s.openTopicInNewWindow);
   const activeAgentId = useAgentStore((s) => s.activeAgentId);
+  const addTab = useElectronStore((s) => s.addTab);
 
   // Construct href for cmd+click support
   const href = useMemo(() => {
@@ -89,11 +90,13 @@ const TopicItem = memo<TopicItemProps>(({ id, title, fav, active, threadId }) =>
   }, [editing, id, navigateToTopic]);
 
   const handleDoubleClick = useCallback(() => {
-    if (!id || !activeAgentId) return;
-    if (isDesktop) {
-      openTopicInNewWindow(activeAgentId, id);
+    if (!id || !activeAgentId || !isDesktop) return;
+    const reference = pluginRegistry.parseUrl(`/agent/${activeAgentId}`, `topic=${id}`);
+    if (reference) {
+      addTab(reference);
+      navigateToTopic(id);
     }
-  }, [id, activeAgentId, openTopicInNewWindow]);
+  }, [id, activeAgentId, addTab, navigateToTopic]);
 
   const dropdownMenu = useTopicItemDropdownMenu({
     id,

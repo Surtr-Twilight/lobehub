@@ -4,7 +4,10 @@ import { type MouseEvent } from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { isDesktop } from '@/const/version';
+import { pluginRegistry } from '@/features/Electron/titlebar/RecentlyViewed/plugins';
 import NavItem from '@/features/NavPanel/components/NavItem';
+import { useElectronStore } from '@/store/electron';
 import { pageSelectors, usePageStore } from '@/store/page';
 
 import Actions from './Actions';
@@ -25,6 +28,7 @@ const PageListItem = memo<DocumentItemProps>(({ pageId, className }) => {
 
   const selectPage = usePageStore((s) => s.selectPage);
   const setRenamingPageId = usePageStore((s) => s.setRenamingPageId);
+  const addTab = useElectronStore((s) => s.addTab);
 
   const active = selectedPageId === pageId;
   const title = document?.title || t('pageList.untitled');
@@ -47,6 +51,15 @@ const PageListItem = memo<DocumentItemProps>(({ pageId, className }) => {
     },
     [editing, selectPage, pageId],
   );
+
+  const handleDoubleClick = useCallback(() => {
+    if (!isDesktop) return;
+    const reference = pluginRegistry.parseUrl(`/page/${pageId}`, '');
+    if (reference) {
+      addTab(reference);
+      selectPage(pageId);
+    }
+  }, [pageId, addTab, selectPage]);
 
   // Icon with emoji support
   const icon = useMemo(() => {
@@ -71,6 +84,7 @@ const PageListItem = memo<DocumentItemProps>(({ pageId, className }) => {
         key={pageId}
         title={title}
         onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
       />
       <Editing
         currentEmoji={emoji}
