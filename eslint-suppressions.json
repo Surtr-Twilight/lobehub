@@ -619,14 +619,6 @@
       "count": 1
     }
   },
-  "src/locales/default/welcome.ts": {
-    "sort-keys-fix/sort-keys-fix": {
-      "count": 1
-    },
-    "typescript-sort-keys/interface": {
-      "count": 1
-    }
-  },
   "src/server/manifest.ts": {
     "object-shorthand": {
       "count": 3
