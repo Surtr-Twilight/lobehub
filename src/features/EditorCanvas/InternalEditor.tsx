@@ -158,7 +158,10 @@ const InternalEditor = memo<InternalEditorProps>(
       // Initialize snapshot before registering listener
       previousDocumentSnapshotRef.current = editor.getDocument('json');
 
-      const unregister = lexicalEditor.registerUpdateListener(() => {
+      const unregister = lexicalEditor.registerUpdateListener(({ dirtyElements, dirtyLeaves }) => {
+        // Skip selection-only / caret-movement updates — no content was mutated.
+        if (dirtyElements.size === 0 && dirtyLeaves.size === 0) return;
+
         const currentDocumentSnapshot = editor.getDocument('json');
 
         if (!isEqual(currentDocumentSnapshot, previousDocumentSnapshotRef.current)) {
