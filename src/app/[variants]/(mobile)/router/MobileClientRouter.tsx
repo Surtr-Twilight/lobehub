@@ -1,17 +1,14 @@
 'use client';
 
-import { BrowserRouter, Routes } from 'react-router-dom';
-
-import { renderRoutes } from '@/utils/router';
+import { useMemo } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { mobileRoutes } from './mobileRouter.config';
 
 const ClientRouter = () => {
-  return (
-    <BrowserRouter>
-      <Routes>{renderRoutes(mobileRoutes)}</Routes>
-    </BrowserRouter>
-  );
+  const router = useMemo(() => createBrowserRouter(mobileRoutes), []);
+
+  return <RouterProvider router={router} />;
 };
 
 export default ClientRouter;

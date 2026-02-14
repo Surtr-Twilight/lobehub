@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, useNavigate } from 'react-router-dom';
+import { memo, useEffect, useMemo } from 'react';
+import { createBrowserRouter, Outlet, RouterProvider, useNavigate } from 'react-router-dom';
 
 import { getDesktopOnboardingCompleted } from '@/app/[variants]/(desktop)/desktop-onboarding/storage';
 import { isDesktop } from '@/const/version';
-import { renderRoutes } from '@/utils/router';
 
 import { desktopRoutes } from './desktopRouter.config';
 
@@ -22,18 +21,35 @@ const DesktopOnboardingRedirect = () => {
     if (window.location.pathname !== '/desktop-onboarding') {
       navigate('/desktop-onboarding', { replace: true });
     }
-  }, []);
+  }, [navigate]);
 
   return null;
 };
 
-const ClientRouter = () => {
+const DesktopRouterRoot = memo(() => {
   return (
-    <BrowserRouter>
-      <Routes>{renderRoutes(desktopRoutes)}</Routes>
+    <>
       {isDesktop && <DesktopOnboardingRedirect />}
-    </BrowserRouter>
+      <Outlet />
+    </>
   );
+});
+
+DesktopRouterRoot.displayName = 'DesktopRouterRoot';
+
+const ClientRouter = () => {
+  const router = useMemo(
+    () =>
+      createBrowserRouter([
+        {
+          children: desktopRoutes,
+          element: <DesktopRouterRoot />,
+        },
+      ]),
+    [],
+  );
+
+  return <RouterProvider router={router} />;
 };
 
 export default ClientRouter;

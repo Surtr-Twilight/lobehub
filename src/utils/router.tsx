@@ -1,8 +1,9 @@
 'use client';
 
+/* eslint-disable react-refresh/only-export-components */
 import { type ComponentType, type ReactElement } from 'react';
 import { createElement, lazy, memo, Suspense, useCallback, useEffect } from 'react';
-import { Navigate, Route, useNavigate, useRouteError } from 'react-router-dom';
+import { Navigate, useNavigate, useRouteError } from 'react-router-dom';
 
 import Loading from '@/components/Loading/BrandTextLoading';
 import { useGlobalStore } from '@/store/global';
@@ -101,57 +102,6 @@ export const NavigatorRegistrar = memo(() => {
 
   return null;
 });
-
-/**
- * Route configuration object type (compatible with createBrowserRouter format)
- */
-export interface RouteConfig {
-  children?: RouteConfig[];
-  element?: ReactElement;
-  errorElement?: ReactElement;
-  // HydrateFallback is ignored in declarative mode
-  HydrateFallback?: ComponentType;
-  index?: boolean;
-  loader?: (args: { params: Record<string, string | undefined> }) => unknown;
-  path?: string;
-}
-
-/**
- * Convert route config objects to declarative Route elements
- * This allows using createBrowserRouter-style config with BrowserRouter
- *
- * @example
- * const routes: RouteConfig[] = [
- *   {
- *     path: '/',
- *     element: <Layout />,
- *     children: [
- *       { path: 'chat', element: <Chat /> }
- *     ]
- *   }
- * ];
- *
- * <BrowserRouter>
- *   <Routes>{renderRoutes(routes)}</Routes>
- * </BrowserRouter>
- */
-export function renderRoutes(routes: RouteConfig[]): ReactElement[] {
-  return routes.map((route, index) => {
-    const { path, element, children, index: isIndex } = route;
-
-    const childRoutes = children ? renderRoutes(children) : undefined;
-
-    if (isIndex) {
-      return <Route index element={element} key={`index-${index}`} />;
-    }
-
-    return (
-      <Route element={element} key={path || index} path={path}>
-        {childRoutes}
-      </Route>
-    );
-  });
-}
 
 /**
  * Create a redirect element for use in route config
