@@ -1,8 +1,8 @@
 import { Given, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-import { TEST_USER, createTestSession } from '../../support/seedTestUser';
-import { CustomWorld } from '../../support/world';
+import { createTestSession, TEST_USER } from '../../support/seedTestUser';
+import { type CustomWorld } from '../../support/world';
 
 /**
  * Login via UI - fills in the login form and submits
@@ -26,7 +26,7 @@ Given('I am logged in as the test user', async function (this: CustomWorld) {
   // Wait for navigation away from signin page
   await this.page.waitForURL((url) => !url.pathname.includes('/signin'), { timeout: 30_000 });
 
-  console.log('✅ Logged in as test user via UI');
+  console.info('✅ Logged in as test user via UI');
 });
 
 /**
@@ -53,7 +53,7 @@ Given('I am logged in with a session', async function (this: CustomWorld) {
     },
   ]);
 
-  console.log('✅ Session cookie set for test user');
+  console.info('✅ Session cookie set for test user');
 });
 
 /**
@@ -87,7 +87,7 @@ Given('I should be logged in', async function (this: CustomWorld) {
   await expect(this.page).not.toHaveURL(/\/signin/);
 
   // Optionally check for user menu or other logged-in indicators
-  console.log('✅ User is logged in');
+  console.info('✅ User is logged in');
 });
 
 /**
@@ -96,5 +96,5 @@ Given('I should be logged in', async function (this: CustomWorld) {
 When('I logout', async function (this: CustomWorld) {
   // Clear cookies to logout
   await this.browserContext.clearCookies();
-  console.log('✅ User logged out (cookies cleared)');
+  console.info('✅ User logged out (cookies cleared)');
 });

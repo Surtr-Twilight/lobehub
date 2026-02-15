@@ -10,7 +10,7 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 import { TEST_USER } from '../../support/seedTestUser';
-import { CustomWorld, WAIT_TIMEOUT } from '../../support/world';
+import { type CustomWorld, WAIT_TIMEOUT } from '../../support/world';
 
 // ============================================
 // Helper Functions
@@ -88,7 +88,7 @@ async function inputNewName(
   }
 
   await this.page.waitForTimeout(1000);
-  console.log(`   ✅ 已输入新名称 "${newName}"`);
+  console.info(`   ✅ 已输入新名称 "${newName}"`);
 }
 
 /**
@@ -115,7 +115,7 @@ async function createTestAgent(title: string = 'Test Agent'): Promise<string> {
       [agentId, slug, title, TEST_USER.id, now],
     );
 
-    console.log(`   📍 Created test agent in DB: ${agentId}`);
+    console.info(`   📍 Created test agent in DB: ${agentId}`);
     return agentId;
   } finally {
     await client.end();
@@ -127,16 +127,16 @@ async function createTestAgent(title: string = 'Test Agent'): Promise<string> {
 // ============================================
 
 Given('用户在 Home 页面有一个 Agent', async function (this: CustomWorld) {
-  console.log('   📍 Step: 在数据库中创建测试 Agent...');
+  console.info('   📍 Step: 在数据库中创建测试 Agent...');
   const agentId = await createTestAgent('E2E Test Agent');
   this.testContext.createdAgentId = agentId;
 
-  console.log('   📍 Step: 导航到 Home 页面...');
+  console.info('   📍 Step: 导航到 Home 页面...');
   await this.page.goto('/');
   await this.page.waitForLoadState('networkidle', { timeout: 15_000 });
   await this.page.waitForTimeout(1000);
 
-  console.log('   📍 Step: 查找新创建的 Agent...');
+  console.info('   📍 Step: 查找新创建的 Agent...');
   // Look for the newly created agent in the sidebar by its specific ID
   const agentItem = this.page.locator(`a[href="/agent/${agentId}"]`).first();
   await expect(agentItem).toBeVisible({ timeout: WAIT_TIMEOUT });
@@ -147,18 +147,18 @@ Given('用户在 Home 页面有一个 Agent', async function (this: CustomWorld)
   this.testContext.targetItemSelector = `a[href="/agent/${agentId}"]`;
   this.testContext.targetType = 'agent';
 
-  console.log(`   ✅ 找到 Agent: ${agentLabel}, id: ${agentId}`);
+  console.info(`   ✅ 找到 Agent: ${agentLabel}, id: ${agentId}`);
 });
 
 Given('该 Agent 未被置顶', { timeout: 30_000 }, async function (this: CustomWorld) {
-  console.log('   📍 Step: 检查 Agent 未被置顶...');
+  console.info('   📍 Step: 检查 Agent 未被置顶...');
   // Check if the agent has a pin icon - if so, unpin it first
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
   // Pin icon uses lucide-react which adds class "lucide lucide-pin"
   const pinIcon = targetItem.locator('svg[class*="lucide-pin"]');
 
   if ((await pinIcon.count()) > 0) {
-    console.log('   📍 Agent 已置顶，开始取消置顶操作...');
+    console.info('   📍 Agent 已置顶，开始取消置顶操作...');
     // Unpin it first
     await targetItem.hover();
     await this.page.waitForTimeout(200);
@@ -166,7 +166,7 @@ Given('该 Agent 未被置顶', { timeout: 30_000 }, async function (this: Custo
     await this.page.waitForTimeout(500);
     const unpinOption = this.page.getByRole('menuitem', { name: /取消置顶|unpin/i });
     await unpinOption.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-      console.log('   ⚠️ 取消置顶选项未找到');
+      console.info('   ⚠️ 取消置顶选项未找到');
     });
     if ((await unpinOption.count()) > 0) {
       await unpinOption.click();
@@ -177,18 +177,18 @@ Given('该 Agent 未被置顶', { timeout: 30_000 }, async function (this: Custo
     await this.page.waitForTimeout(300);
   }
 
-  console.log('   ✅ Agent 未被置顶');
+  console.info('   ✅ Agent 未被置顶');
 });
 
 Given('该 Agent 已被置顶', { timeout: 30_000 }, async function (this: CustomWorld) {
-  console.log('   📍 Step: 确保 Agent 已被置顶...');
+  console.info('   📍 Step: 确保 Agent 已被置顶...');
   // Check if the agent has a pin icon - if not, pin it first
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
   // Pin icon uses lucide-react which adds class "lucide lucide-pin"
   const pinIcon = targetItem.locator('svg[class*="lucide-pin"]');
 
   if ((await pinIcon.count()) === 0) {
-    console.log('   📍 Agent 未置顶，开始置顶操作...');
+    console.info('   📍 Agent 未置顶，开始置顶操作...');
     // Pin it first - right-click on the NavItem Block inside the Link
     // The ContextMenuTrigger is attached to the Block component inside the Link
     await targetItem.hover();
@@ -198,16 +198,16 @@ Given('该 Agent 已被置顶', { timeout: 30_000 }, async function (this: Custo
 
     // Debug: check menu visibility
     const menuItems = await this.page.locator('[role="menuitem"]').count();
-    console.log(`   📍 Debug: 发现 ${menuItems} 个菜单项`);
+    console.info(`   📍 Debug: 发现 ${menuItems} 个菜单项`);
 
     const pinOption = this.page.getByRole('menuitem', { name: /置顶|pin/i });
     await pinOption.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-      console.log('   ⚠️ 置顶选项未找到');
+      console.info('   ⚠️ 置顶选项未找到');
     });
     if ((await pinOption.count()) > 0) {
       await pinOption.click();
       await this.page.waitForTimeout(500);
-      console.log('   ✅ 已点击置顶选项');
+      console.info('   ✅ 已点击置顶选项');
     }
     // Close menu if still open
     await this.page.keyboard.press('Escape');
@@ -218,7 +218,7 @@ Given('该 Agent 已被置顶', { timeout: 30_000 }, async function (this: Custo
   await this.page.waitForTimeout(500);
   const pinIconAfter = targetItem.locator('svg[class*="lucide-pin"]');
   const isPinned = (await pinIconAfter.count()) > 0;
-  console.log(`   ✅ Agent 已被置顶: ${isPinned}`);
+  console.info(`   ✅ Agent 已被置顶: ${isPinned}`);
 });
 
 // ============================================
@@ -226,7 +226,7 @@ Given('该 Agent 已被置顶', { timeout: 30_000 }, async function (this: Custo
 // ============================================
 
 When('用户右键点击该 Agent', { timeout: 30_000 }, async function (this: CustomWorld) {
-  console.log('   📍 Step: 右键点击 Agent...');
+  console.info('   📍 Step: 右键点击 Agent...');
 
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
 
@@ -241,28 +241,28 @@ When('用户右键点击该 Agent', { timeout: 30_000 }, async function (this: C
   // Wait for context menu to appear
   const menuItem = this.page.locator('[role="menuitem"]').first();
   await menuItem.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
-    console.log('   ⚠️ 菜单未出现，重试右键点击...');
+    console.info('   ⚠️ 菜单未出现，重试右键点击...');
   });
 
   // Debug: check what menus are visible
   const menuItems = await this.page.locator('[role="menuitem"]').count();
-  console.log(`   📍 Debug: Found ${menuItems} menu items after right-click`);
+  console.info(`   📍 Debug: Found ${menuItems} menu items after right-click`);
 
-  console.log('   ✅ 已右键点击 Agent');
+  console.info('   ✅ 已右键点击 Agent');
 });
 
 When('用户悬停在该 Agent 上', async function (this: CustomWorld) {
-  console.log('   📍 Step: 悬停在 Agent 上...');
+  console.info('   📍 Step: 悬停在 Agent 上...');
 
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
   await targetItem.hover();
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已悬停在 Agent 上');
+  console.info('   ✅ 已悬停在 Agent 上');
 });
 
 When('用户点击更多操作按钮', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击更多操作按钮...');
+  console.info('   📍 Step: 点击更多操作按钮...');
 
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
   const moreButton = targetItem.locator('svg.lucide-ellipsis, svg.lucide-more-horizontal').first();
@@ -282,71 +282,71 @@ When('用户点击更多操作按钮', async function (this: CustomWorld) {
   }
 
   await this.page.waitForTimeout(500);
-  console.log('   ✅ 已点击更多操作按钮');
+  console.info('   ✅ 已点击更多操作按钮');
 });
 
 When('用户在菜单中选择重命名', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择重命名选项...');
+  console.info('   📍 Step: 选择重命名选项...');
 
   const renameOption = this.page.getByRole('menuitem', { name: /^(rename|重命名)$/i });
   await expect(renameOption).toBeVisible({ timeout: 5000 });
   await renameOption.click();
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已选择重命名选项');
+  console.info('   ✅ 已选择重命名选项');
 });
 
 When('用户在菜单中选择置顶', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择置顶选项...');
+  console.info('   📍 Step: 选择置顶选项...');
 
   const pinOption = this.page.getByRole('menuitem', { name: /^(pin|置顶)$/i });
   await expect(pinOption).toBeVisible({ timeout: 5000 });
   await pinOption.click();
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已选择置顶选项');
+  console.info('   ✅ 已选择置顶选项');
 });
 
 When('用户在菜单中选择取消置顶', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择取消置顶选项...');
+  console.info('   📍 Step: 选择取消置顶选项...');
 
   const unpinOption = this.page.getByRole('menuitem', { name: /^(unpin|取消置顶)$/i });
   await expect(unpinOption).toBeVisible({ timeout: 5000 });
   await unpinOption.click();
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已选择取消置顶选项');
+  console.info('   ✅ 已选择取消置顶选项');
 });
 
 When('用户在菜单中选择删除', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择删除选项...');
+  console.info('   📍 Step: 选择删除选项...');
 
   const deleteOption = this.page.getByRole('menuitem', { name: /^(delete|删除)$/i });
   await expect(deleteOption).toBeVisible({ timeout: 5000 });
   await deleteOption.click();
   await this.page.waitForTimeout(300);
 
-  console.log('   ✅ 已选择删除选项');
+  console.info('   ✅ 已选择删除选项');
 });
 
 When('用户在弹窗中确认删除', async function (this: CustomWorld) {
-  console.log('   📍 Step: 确认删除...');
+  console.info('   📍 Step: 确认删除...');
 
   const confirmButton = this.page.locator('.ant-modal-confirm-btns button.ant-btn-dangerous');
   await expect(confirmButton).toBeVisible({ timeout: 5000 });
   await confirmButton.click();
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已确认删除');
+  console.info('   ✅ 已确认删除');
 });
 
 When('用户输入新的名称 {string}', async function (this: CustomWorld, newName: string) {
-  console.log(`   📍 Step: 输入新名称 "${newName}"...`);
+  console.info(`   📍 Step: 输入新名称 "${newName}"...`);
   await inputNewName.call(this, newName, false);
 });
 
 When('用户输入新的名称 {string} 并按 Enter', async function (this: CustomWorld, newName: string) {
-  console.log(`   📍 Step: 输入新名称 "${newName}" 并按 Enter...`);
+  console.info(`   📍 Step: 输入新名称 "${newName}" 并按 Enter...`);
   await inputNewName.call(this, newName, true);
 });
 
@@ -355,17 +355,17 @@ When('用户输入新的名称 {string} 并按 Enter', async function (this: Cus
 // ============================================
 
 Then('该项名称应该更新为 {string}', async function (this: CustomWorld, expectedName: string) {
-  console.log(`   📍 Step: 验证名称为 "${expectedName}"...`);
+  console.info(`   📍 Step: 验证名称为 "${expectedName}"...`);
 
   await this.page.waitForTimeout(1000);
   const renamedItem = this.page.getByText(expectedName, { exact: true }).first();
   await expect(renamedItem).toBeVisible({ timeout: 5000 });
 
-  console.log(`   ✅ 名称已更新为 "${expectedName}"`);
+  console.info(`   ✅ 名称已更新为 "${expectedName}"`);
 });
 
 Then('Agent 应该显示置顶图标', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证显示置顶图标...');
+  console.info('   📍 Step: 验证显示置顶图标...');
 
   await this.page.waitForTimeout(500);
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
@@ -373,11 +373,11 @@ Then('Agent 应该显示置顶图标', async function (this: CustomWorld) {
   const pinIcon = targetItem.locator('svg[class*="lucide-pin"]');
   await expect(pinIcon).toBeVisible({ timeout: 5000 });
 
-  console.log('   ✅ 置顶图标已显示');
+  console.info('   ✅ 置顶图标已显示');
 });
 
 Then('Agent 不应该显示置顶图标', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证不显示置顶图标...');
+  console.info('   📍 Step: 验证不显示置顶图标...');
 
   await this.page.waitForTimeout(500);
   const targetItem = this.page.locator(this.testContext.targetItemSelector).first();
@@ -385,11 +385,11 @@ Then('Agent 不应该显示置顶图标', async function (this: CustomWorld) {
   const pinIcon = targetItem.locator('svg[class*="lucide-pin"]');
   await expect(pinIcon).not.toBeVisible({ timeout: 5000 });
 
-  console.log('   ✅ 置顶图标未显示');
+  console.info('   ✅ 置顶图标未显示');
 });
 
 Then('Agent 应该从列表中移除', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证 Agent 已移除...');
+  console.info('   📍 Step: 验证 Agent 已移除...');
 
   await this.page.waitForTimeout(500);
 
@@ -400,5 +400,5 @@ Then('Agent 应该从列表中移除', async function (this: CustomWorld) {
     await expect(deletedItem).not.toBeVisible({ timeout: 5000 });
   }
 
-  console.log('   ✅ Agent 已从列表中移除');
+  console.info('   ✅ Agent 已从列表中移除');
 });

@@ -6,14 +6,14 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-import { CustomWorld, WAIT_TIMEOUT } from '../../support/world';
+import { type CustomWorld, WAIT_TIMEOUT } from '../../support/world';
 
 // ============================================
 // Given Steps
 // ============================================
 
 Given('用户打开一个文稿编辑器', async function (this: CustomWorld) {
-  console.log('   📍 Step: 创建并打开一个文稿...');
+  console.info('   📍 Step: 创建并打开一个文稿...');
 
   // Navigate to page module
   await this.page.goto('/page');
@@ -30,11 +30,11 @@ Given('用户打开一个文稿编辑器', async function (this: CustomWorld) {
   await this.page.waitForLoadState('networkidle');
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已打开文稿编辑器');
+  console.info('   ✅ 已打开文稿编辑器');
 });
 
 Given('用户打开一个带有 Emoji 的文稿', async function (this: CustomWorld) {
-  console.log('   📍 Step: 创建并打开一个带 Emoji 的文稿...');
+  console.info('   📍 Step: 创建并打开一个带 Emoji 的文稿...');
 
   // First create and open a page
   await this.page.goto('/page');
@@ -50,7 +50,7 @@ Given('用户打开一个带有 Emoji 的文稿', async function (this: CustomWo
   await this.page.waitForTimeout(500);
 
   // Add emoji by clicking the "Choose Icon" button
-  console.log('   📍 Step: 添加 Emoji 图标...');
+  console.info('   📍 Step: 添加 Emoji 图标...');
 
   // Hover over title section to show the button
   const titleSection = this.page.locator('textarea').first().locator('xpath=ancestor::div[1]');
@@ -77,7 +77,7 @@ Given('用户打开一个带有 Emoji 的文稿', async function (this: CustomWo
     await this.page.waitForTimeout(500);
   }
 
-  console.log('   ✅ 已打开带 Emoji 的文稿');
+  console.info('   ✅ 已打开带 Emoji 的文稿');
 });
 
 // ============================================
@@ -85,18 +85,18 @@ Given('用户打开一个带有 Emoji 的文稿', async function (this: CustomWo
 // ============================================
 
 When('用户点击标题输入框', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击标题输入框...');
+  console.info('   📍 Step: 点击标题输入框...');
 
   const titleInput = this.page.locator('textarea').first();
   await expect(titleInput).toBeVisible({ timeout: 5000 });
   await titleInput.click();
   await this.page.waitForTimeout(300);
 
-  console.log('   ✅ 已点击标题输入框');
+  console.info('   ✅ 已点击标题输入框');
 });
 
 When('用户输入标题 {string}', async function (this: CustomWorld, title: string) {
-  console.log(`   📍 Step: 输入标题 "${title}"...`);
+  console.info(`   📍 Step: 输入标题 "${title}"...`);
 
   const titleInput = this.page.locator('textarea').first();
 
@@ -109,11 +109,11 @@ When('用户输入标题 {string}', async function (this: CustomWorld, title: st
   // Store for later verification
   this.testContext.expectedTitle = title;
 
-  console.log(`   ✅ 已输入标题 "${title}"`);
+  console.info(`   ✅ 已输入标题 "${title}"`);
 });
 
 When('用户清空标题内容', async function (this: CustomWorld) {
-  console.log('   📍 Step: 清空标题内容...');
+  console.info('   📍 Step: 清空标题内容...');
 
   const titleInput = this.page.locator('textarea').first();
   await titleInput.click();
@@ -125,7 +125,7 @@ When('用户清空标题内容', async function (this: CustomWorld) {
   await this.page.click('body', { position: { x: 400, y: 400 } });
   await this.page.waitForTimeout(1500);
 
-  console.log('   ✅ 已清空标题内容');
+  console.info('   ✅ 已清空标题内容');
 });
 
 // ============================================
@@ -133,7 +133,7 @@ When('用户清空标题内容', async function (this: CustomWorld) {
 // ============================================
 
 When('用户点击选择图标按钮', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击选择图标按钮...');
+  console.info('   📍 Step: 点击选择图标按钮...');
 
   // Hover to show the button
   const titleSection = this.page.locator('textarea').first().locator('xpath=ancestor::div[1]');
@@ -146,11 +146,11 @@ When('用户点击选择图标按钮', async function (this: CustomWorld) {
   await chooseIconButton.click();
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已点击选择图标按钮');
+  console.info('   ✅ 已点击选择图标按钮');
 });
 
 When('用户选择一个 Emoji', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择一个 Emoji...');
+  console.info('   📍 Step: 选择一个 Emoji...');
 
   // Wait for emoji picker to be visible
   await this.page.waitForTimeout(800);
@@ -171,28 +171,28 @@ When('用户选择一个 Emoji', async function (this: CustomWorld) {
   for (const selector of emojiSelectors) {
     const emojis = this.page.locator(selector);
     const count = await emojis.count();
-    console.log(`   📍 Debug: Found ${count} elements with selector "${selector}"`);
+    console.info(`   📍 Debug: Found ${count} elements with selector "${selector}"`);
     if (count > 0) {
       // Click a random emoji (not the first to avoid default)
       const index = Math.min(5, count - 1);
       await emojis.nth(index).click();
       clicked = true;
-      console.log(`   📍 Debug: Clicked emoji at index ${index}`);
+      console.info(`   📍 Debug: Clicked emoji at index ${index}`);
       break;
     }
   }
 
   // Fallback: try to find any clickable element in the emoji popover
   if (!clicked) {
-    console.log('   📍 Debug: Trying fallback - looking for emoji in popover');
+    console.info('   📍 Debug: Trying fallback - looking for emoji in popover');
     const popover = this.page.locator('.ant-popover-inner, [class*="popover"]').first();
     if ((await popover.count()) > 0) {
       // Find spans that look like emojis (single character with emoji range)
       const emojiSpans = popover.locator('span').filter({
-        hasText: /^[\p{Emoji}]$/u,
+        hasText: /^\p{Emoji}$/u,
       });
       const count = await emojiSpans.count();
-      console.log(`   📍 Debug: Found ${count} emoji spans in popover`);
+      console.info(`   📍 Debug: Found ${count} emoji spans in popover`);
       if (count > 0) {
         await emojiSpans.nth(Math.min(5, count - 1)).click();
         clicked = true;
@@ -201,16 +201,16 @@ When('用户选择一个 Emoji', async function (this: CustomWorld) {
   }
 
   if (!clicked) {
-    console.log('   ⚠️ Could not find emoji button, test may fail');
+    console.info('   ⚠️ Could not find emoji button, test may fail');
   }
 
   await this.page.waitForTimeout(1000);
 
-  console.log('   ✅ 已选择 Emoji');
+  console.info('   ✅ 已选择 Emoji');
 });
 
 When('用户点击已有的 Emoji 图标', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击已有的 Emoji 图标...');
+  console.info('   📍 Step: 点击已有的 Emoji 图标...');
 
   // The emoji is displayed in an Avatar component with square shape
   // Look for the emoji display element near the title
@@ -230,11 +230,11 @@ When('用户点击已有的 Emoji 图标', async function (this: CustomWorld) {
 
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已点击 Emoji 图标');
+  console.info('   ✅ 已点击 Emoji 图标');
 });
 
 When('用户选择另一个 Emoji', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择另一个 Emoji...');
+  console.info('   📍 Step: 选择另一个 Emoji...');
 
   // Same as selecting an emoji, but choose a different index
   await this.page.waitForTimeout(500);
@@ -254,11 +254,11 @@ When('用户选择另一个 Emoji', async function (this: CustomWorld) {
 
   await this.page.waitForTimeout(1000);
 
-  console.log('   ✅ 已选择另一个 Emoji');
+  console.info('   ✅ 已选择另一个 Emoji');
 });
 
 When('用户点击删除图标按钮', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击删除图标按钮...');
+  console.info('   📍 Step: 点击删除图标按钮...');
 
   // Look for delete button in the emoji picker
   const deleteButton = this.page.getByRole('button', { name: /delete|删除/i });
@@ -274,7 +274,7 @@ When('用户点击删除图标按钮', async function (this: CustomWorld) {
 
   await this.page.waitForTimeout(1000);
 
-  console.log('   ✅ 已点击删除图标按钮');
+  console.info('   ✅ 已点击删除图标按钮');
 });
 
 // ============================================
@@ -282,7 +282,7 @@ When('用户点击删除图标按钮', async function (this: CustomWorld) {
 // ============================================
 
 Then('文稿标题应该更新为 {string}', async function (this: CustomWorld, expectedTitle: string) {
-  console.log(`   📍 Step: 验证标题为 "${expectedTitle}"...`);
+  console.info(`   📍 Step: 验证标题为 "${expectedTitle}"...`);
 
   const titleInput = this.page.locator('textarea').first();
   await expect(titleInput).toHaveValue(expectedTitle, { timeout: 5000 });
@@ -295,16 +295,16 @@ Then('文稿标题应该更新为 {string}', async function (this: CustomWorld, 
   // Sidebar might take longer to sync
   try {
     await expect(sidebarItem).toBeVisible({ timeout: 3000 });
-    console.log('   ✅ 侧边栏标题也已更新');
+    console.info('   ✅ 侧边栏标题也已更新');
   } catch {
-    console.log('   ⚠️ 侧边栏标题可能未同步（非关键）');
+    console.info('   ⚠️ 侧边栏标题可能未同步（非关键）');
   }
 
-  console.log(`   ✅ 标题已更新为 "${expectedTitle}"`);
+  console.info(`   ✅ 标题已更新为 "${expectedTitle}"`);
 });
 
 Then('应该显示标题占位符', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证显示占位符...');
+  console.info('   📍 Step: 验证显示占位符...');
 
   const titleInput = this.page.locator('textarea').first();
 
@@ -317,11 +317,11 @@ Then('应该显示标题占位符', async function (this: CustomWorld) {
   const isEmptyOrDefault = value === '' || value === 'Untitled' || value === '无标题';
   expect(isEmptyOrDefault).toBe(true);
 
-  console.log(`   ✅ 显示占位符: "${placeholder}", 当前值: "${value}"`);
+  console.info(`   ✅ 显示占位符: "${placeholder}", 当前值: "${value}"`);
 });
 
 Then('文稿应该显示所选的 Emoji 图标', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证显示 Emoji 图标...');
+  console.info('   📍 Step: 验证显示 Emoji 图标...');
 
   // Look for emoji display - could be in Avatar or span element
   // The emoji picker uses @lobehub/ui which may render differently
@@ -349,11 +349,11 @@ Then('文稿应该显示所选的 Emoji 图标', async function (this: CustomWor
 
   expect(found).toBe(true);
 
-  console.log('   ✅ 文稿显示 Emoji 图标');
+  console.info('   ✅ 文稿显示 Emoji 图标');
 });
 
 Then('文稿图标应该更新为新的 Emoji', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证 Emoji 图标已更新...');
+  console.info('   📍 Step: 验证 Emoji 图标已更新...');
 
   // Look for emoji display
   const emojiSelectors = [
@@ -380,11 +380,11 @@ Then('文稿图标应该更新为新的 Emoji', async function (this: CustomWorl
 
   expect(found).toBe(true);
 
-  console.log('   ✅ Emoji 图标已更新');
+  console.info('   ✅ Emoji 图标已更新');
 });
 
 Then('文稿不应该显示 Emoji 图标', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证不显示 Emoji 图标...');
+  console.info('   📍 Step: 验证不显示 Emoji 图标...');
 
   // After deletion, the "Choose Icon" button should be visible
   // and the emoji avatar should be hidden
@@ -400,11 +400,11 @@ Then('文稿不应该显示 Emoji 图标', async function (this: CustomWorld) {
   // Either the button is visible OR the emoji avatar is not visible
   try {
     await expect(chooseIconButton).toBeVisible({ timeout: 3000 });
-    console.log('   ✅ 选择图标按钮可见，说明 Emoji 已删除');
+    console.info('   ✅ 选择图标按钮可见，说明 Emoji 已删除');
   } catch {
     // Emoji might still be there but different
-    console.log('   ⚠️ 无法确认 Emoji 是否删除');
+    console.info('   ⚠️ 无法确认 Emoji 是否删除');
   }
 
-  console.log('   ✅ 验证完成');
+  console.info('   ✅ 验证完成');
 });

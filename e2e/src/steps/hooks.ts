@@ -1,9 +1,9 @@
-import { After, AfterAll, Before, BeforeAll, Status, setDefaultTimeout } from '@cucumber/cucumber';
-import { type Cookie, chromium } from 'playwright';
+import { After, AfterAll, Before, BeforeAll, setDefaultTimeout, Status } from '@cucumber/cucumber';
+import { chromium, type Cookie } from 'playwright';
 
-import { TEST_USER, seedTestUser } from '../support/seedTestUser';
+import { seedTestUser, TEST_USER } from '../support/seedTestUser';
 import { startWebServer, stopWebServer } from '../support/webServer';
-import { CustomWorld } from '../support/world';
+import { type CustomWorld } from '../support/world';
 
 process.env['E2E'] = '1';
 // Set default timeout for all steps to 10 seconds
@@ -14,12 +14,12 @@ let baseUrl: string;
 let sessionCookies: Cookie[] = [];
 
 BeforeAll({ timeout: 600_000 }, async function () {
-  console.log('🚀 Starting E2E test suite...');
+  console.info('🚀 Starting E2E test suite...');
 
   const PORT = process.env.PORT ? Number(process.env.PORT) : 3006;
   baseUrl = process.env.BASE_URL || `http://localhost:${PORT}`;
 
-  console.log(`Base URL: ${baseUrl}`);
+  console.info(`Base URL: ${baseUrl}`);
 
   // Seed test user before starting web server
   await seedTestUser();
@@ -35,7 +35,7 @@ BeforeAll({ timeout: 600_000 }, async function () {
   }
 
   // Login once and cache the session cookies
-  console.log('🔐 Performing one-time login to cache session...');
+  console.info('🔐 Performing one-time login to cache session...');
 
   const browser = await chromium.launch({ headless: process.env.HEADLESS !== 'false' });
   const context = await browser.newContext();
@@ -55,14 +55,14 @@ BeforeAll({ timeout: 600_000 }, async function () {
     const emailInputVisible = await emailInput.isVisible().catch(() => false);
 
     if (!emailInputVisible) {
-      console.log(
+      console.info(
         '⚠️  Login form not available, skipping authentication (tests requiring auth may fail)',
       );
       return;
     }
 
     // Step 1: Enter email
-    console.log('   Step 1: Entering email...');
+    console.info('   Step 1: Entering email...');
     await emailInput.fill(TEST_USER.email);
 
     // Click the next button
@@ -70,7 +70,7 @@ BeforeAll({ timeout: 600_000 }, async function () {
     await nextButton.click();
 
     // Step 2: Wait for password step and enter password
-    console.log('   Step 2: Entering password...');
+    console.info('   Step 2: Entering password...');
     const passwordInput = page
       .locator('input[id="password"], input[name="password"], input[type="password"]')
       .first();
@@ -87,7 +87,7 @@ BeforeAll({ timeout: 600_000 }, async function () {
 
     // Cache the session cookies
     sessionCookies = await context.cookies();
-    console.log(`✅ Login successful, cached ${sessionCookies.length} cookies`);
+    console.info(`✅ Login successful, cached ${sessionCookies.length} cookies`);
   } finally {
     await browser.close();
   }
@@ -104,7 +104,7 @@ Before(async function (this: CustomWorld, { pickle }) {
       tag.name.startsWith('@PAGE-') ||
       tag.name.startsWith('@ROUTES-'),
   );
-  console.log(`\n📝 Running: ${pickle.name}${testId ? ` (${testId.name.replace('@', '')})` : ''}`);
+  console.info(`\n📝 Running: ${pickle.name}${testId ? ` (${testId.name.replace('@', '')})` : ''}`);
 
   // Setup API mocks before any page navigation
   // await mockManager.setup(this.page);
@@ -112,7 +112,7 @@ Before(async function (this: CustomWorld, { pickle }) {
   // Set cached session cookies to skip login
   if (sessionCookies.length > 0) {
     await this.browserContext.addCookies(sessionCookies);
-    console.log('🍪 Session cookies restored');
+    console.info('🍪 Session cookies restored');
   }
 });
 
@@ -140,19 +140,19 @@ After(async function (this: CustomWorld, { pickle, result }) {
       this.attach(`JavaScript Errors:\n${errors}`, 'text/plain');
     }
 
-    console.log(`❌ Failed: ${pickle.name}`);
+    console.info(`❌ Failed: ${pickle.name}`);
     if (result.message) {
-      console.log(`   Error: ${result.message}`);
+      console.info(`   Error: ${result.message}`);
     }
   } else if (result?.status === Status.PASSED) {
-    console.log(`✅ Passed: ${pickle.name}`);
+    console.info(`✅ Passed: ${pickle.name}`);
   }
 
   await this.cleanup();
 });
 
 AfterAll(async function () {
-  console.log('\n🏁 Test suite completed');
+  console.info('\n🏁 Test suite completed');
 
   // Stop web server if we started it
   if (!process.env.BASE_URL && process.env.CI) {

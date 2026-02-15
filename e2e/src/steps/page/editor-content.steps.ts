@@ -6,7 +6,7 @@
 import { Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-import { CustomWorld } from '../../support/world';
+import { type CustomWorld } from '../../support/world';
 
 // ============================================
 // Helper Functions
@@ -26,7 +26,7 @@ async function getEditor(world: CustomWorld) {
 // ============================================
 
 When('用户点击编辑器内容区域', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击编辑器内容区域...');
+  console.info('   📍 Step: 点击编辑器内容区域...');
 
   const editorContent = this.page.locator('[contenteditable="true"]').first();
   if ((await editorContent.count()) > 0) {
@@ -37,21 +37,21 @@ When('用户点击编辑器内容区域', async function (this: CustomWorld) {
   }
   await this.page.waitForTimeout(500);
 
-  console.log('   ✅ 已点击编辑器内容区域');
+  console.info('   ✅ 已点击编辑器内容区域');
 });
 
 When('用户按下 Enter 键', async function (this: CustomWorld) {
-  console.log('   📍 Step: 按下 Enter 键...');
+  console.info('   📍 Step: 按下 Enter 键...');
 
   await this.page.keyboard.press('Enter');
   // Wait for debounce save (1000ms) + buffer
   await this.page.waitForTimeout(1500);
 
-  console.log('   ✅ 已按下 Enter 键');
+  console.info('   ✅ 已按下 Enter 键');
 });
 
 When('用户输入文本 {string}', async function (this: CustomWorld, text: string) {
-  console.log(`   📍 Step: 输入文本 "${text}"...`);
+  console.info(`   📍 Step: 输入文本 "${text}"...`);
 
   await this.page.keyboard.type(text, { delay: 30 });
   await this.page.waitForTimeout(300);
@@ -59,11 +59,11 @@ When('用户输入文本 {string}', async function (this: CustomWorld, text: str
   // Store for later verification
   this.testContext.inputText = text;
 
-  console.log(`   ✅ 已输入文本 "${text}"`);
+  console.info(`   ✅ 已输入文本 "${text}"`);
 });
 
 When('用户在编辑器中输入内容 {string}', async function (this: CustomWorld, content: string) {
-  console.log(`   📍 Step: 在编辑器中输入内容 "${content}"...`);
+  console.info(`   📍 Step: 在编辑器中输入内容 "${content}"...`);
 
   const editor = await getEditor(this);
   await editor.click();
@@ -73,16 +73,16 @@ When('用户在编辑器中输入内容 {string}', async function (this: CustomW
 
   this.testContext.inputText = content;
 
-  console.log(`   ✅ 已输入内容 "${content}"`);
+  console.info(`   ✅ 已输入内容 "${content}"`);
 });
 
 When('用户选中所有内容', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选中所有内容...');
+  console.info('   📍 Step: 选中所有内容...');
 
   await this.page.keyboard.press(`${this.modKey}+A`);
   await this.page.waitForTimeout(300);
 
-  console.log('   ✅ 已选中所有内容');
+  console.info('   ✅ 已选中所有内容');
 });
 
 // ============================================
@@ -90,17 +90,17 @@ When('用户选中所有内容', async function (this: CustomWorld) {
 // ============================================
 
 When('用户输入斜杠 {string}', async function (this: CustomWorld, slash: string) {
-  console.log(`   📍 Step: 输入斜杠 "${slash}"...`);
+  console.info(`   📍 Step: 输入斜杠 "${slash}"...`);
 
   await this.page.keyboard.type(slash, { delay: 50 });
   // Wait for slash menu to appear
   await this.page.waitForTimeout(500);
 
-  console.log(`   ✅ 已输入斜杠 "${slash}"`);
+  console.info(`   ✅ 已输入斜杠 "${slash}"`);
 });
 
 When('用户输入斜杠命令 {string}', async function (this: CustomWorld, command: string) {
-  console.log(`   📍 Step: 输入斜杠命令 "${command}"...`);
+  console.info(`   📍 Step: 输入斜杠命令 "${command}"...`);
 
   // The command format is "/shortcut" (e.g., "/h1", "/codeblock")
   // First type the slash and wait for menu
@@ -112,7 +112,7 @@ When('用户输入斜杠命令 {string}', async function (this: CustomWorld, com
   await this.page.keyboard.type(shortcut, { delay: 80 });
   await this.page.waitForTimeout(500); // Wait for menu to filter
 
-  console.log(`   ✅ 已输入斜杠命令 "${command}"`);
+  console.info(`   ✅ 已输入斜杠命令 "${command}"`);
 });
 
 // ============================================
@@ -120,14 +120,14 @@ When('用户输入斜杠命令 {string}', async function (this: CustomWorld, com
 // ============================================
 
 When('用户按下快捷键 {string}', async function (this: CustomWorld, shortcut: string) {
-  console.log(`   📍 Step: 按下快捷键 "${shortcut}"...`);
+  console.info(`   📍 Step: 按下快捷键 "${shortcut}"...`);
 
   // Convert Meta to platform-specific modifier key for cross-platform support
   const platformShortcut = shortcut.replaceAll('Meta', this.modKey);
   await this.page.keyboard.press(platformShortcut);
   await this.page.waitForTimeout(300);
 
-  console.log(`   ✅ 已按下快捷键 "${platformShortcut}"`);
+  console.info(`   ✅ 已按下快捷键 "${platformShortcut}"`);
 });
 
 // ============================================
@@ -135,7 +135,7 @@ When('用户按下快捷键 {string}', async function (this: CustomWorld, shortc
 // ============================================
 
 Then('编辑器应该显示输入的文本', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证编辑器显示输入的文本...');
+  console.info('   📍 Step: 验证编辑器显示输入的文本...');
 
   const editor = await getEditor(this);
   const text = this.testContext.inputText;
@@ -144,17 +144,17 @@ Then('编辑器应该显示输入的文本', async function (this: CustomWorld) 
   const editorText = await editor.textContent();
   expect(editorText).toContain(text);
 
-  console.log(`   ✅ 编辑器显示文本: "${text}"`);
+  console.info(`   ✅ 编辑器显示文本: "${text}"`);
 });
 
 Then('编辑器应该显示 {string}', async function (this: CustomWorld, expectedText: string) {
-  console.log(`   📍 Step: 验证编辑器显示 "${expectedText}"...`);
+  console.info(`   📍 Step: 验证编辑器显示 "${expectedText}"...`);
 
   const editor = await getEditor(this);
   const editorText = await editor.textContent();
   expect(editorText).toContain(expectedText);
 
-  console.log(`   ✅ 编辑器显示 "${expectedText}"`);
+  console.info(`   ✅ 编辑器显示 "${expectedText}"`);
 });
 
 // ============================================
@@ -162,7 +162,7 @@ Then('编辑器应该显示 {string}', async function (this: CustomWorld, expect
 // ============================================
 
 Then('应该显示斜杠命令菜单', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证显示斜杠命令菜单...');
+  console.info('   📍 Step: 验证显示斜杠命令菜单...');
 
   // The slash menu should be visible
   // Look for menu with heading options, list options, etc.
@@ -189,11 +189,11 @@ Then('应该显示斜杠命令菜单', async function (this: CustomWorld) {
 
   expect(menuFound).toBe(true);
 
-  console.log('   ✅ 斜杠命令菜单已显示');
+  console.info('   ✅ 斜杠命令菜单已显示');
 });
 
 Then('编辑器应该包含一级标题', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证编辑器包含一级标题...');
+  console.info('   📍 Step: 验证编辑器包含一级标题...');
 
   // Check for h1 element in the editor
   const editor = await getEditor(this);
@@ -201,22 +201,22 @@ Then('编辑器应该包含一级标题', async function (this: CustomWorld) {
 
   await expect(h1).toBeVisible({ timeout: 5000 });
 
-  console.log('   ✅ 编辑器包含一级标题');
+  console.info('   ✅ 编辑器包含一级标题');
 });
 
 Then('编辑器应该包含无序列表', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证编辑器包含无序列表...');
+  console.info('   📍 Step: 验证编辑器包含无序列表...');
 
   const editor = await getEditor(this);
   const ul = editor.locator('ul');
 
   await expect(ul).toBeVisible({ timeout: 5000 });
 
-  console.log('   ✅ 编辑器包含无序列表');
+  console.info('   ✅ 编辑器包含无序列表');
 });
 
 Then('编辑器应该包含任务列表', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证编辑器包含任务列表...');
+  console.info('   📍 Step: 验证编辑器包含任务列表...');
 
   const editor = await getEditor(this);
 
@@ -245,11 +245,11 @@ Then('编辑器应该包含任务列表', async function (this: CustomWorld) {
 
   expect(found).toBe(true);
 
-  console.log('   ✅ 编辑器包含任务列表');
+  console.info('   ✅ 编辑器包含任务列表');
 });
 
 Then('编辑器应该包含代码块', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证编辑器包含代码块...');
+  console.info('   📍 Step: 验证编辑器包含代码块...');
 
   // Code block might be rendered inside the editor OR as a sibling element
   // CodeMirror renders its own container
@@ -287,7 +287,7 @@ Then('编辑器应该包含代码块', async function (this: CustomWorld) {
 
   expect(found).toBe(true);
 
-  console.log('   ✅ 编辑器包含代码块');
+  console.info('   ✅ 编辑器包含代码块');
 });
 
 // ============================================
@@ -295,7 +295,7 @@ Then('编辑器应该包含代码块', async function (this: CustomWorld) {
 // ============================================
 
 Then('选中的文本应该被加粗', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证文本已加粗...');
+  console.info('   📍 Step: 验证文本已加粗...');
 
   const editor = await getEditor(this);
 
@@ -318,11 +318,11 @@ Then('选中的文本应该被加粗', async function (this: CustomWorld) {
 
   expect(found).toBe(true);
 
-  console.log('   ✅ 文本已加粗');
+  console.info('   ✅ 文本已加粗');
 });
 
 Then('选中的文本应该变为斜体', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证文本已斜体...');
+  console.info('   📍 Step: 验证文本已斜体...');
 
   const editor = await getEditor(this);
 
@@ -340,5 +340,5 @@ Then('选中的文本应该变为斜体', async function (this: CustomWorld) {
 
   expect(found).toBe(true);
 
-  console.log('   ✅ 文本已斜体');
+  console.info('   ✅ 文本已斜体');
 });

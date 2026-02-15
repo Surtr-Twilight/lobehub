@@ -1,7 +1,7 @@
 import { Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-import { CustomWorld } from '../../support/world';
+import { type CustomWorld } from '../../support/world';
 
 // ============================================
 // When Steps (Actions)
@@ -35,7 +35,7 @@ When('I click on a category in the category menu', async function (this: CustomW
   );
 
   const count = await categoryItems.count();
-  console.log(`   📍 Found ${count} category items`);
+  console.info(`   📍 Found ${count} category items`);
 
   if (count === 0) {
     // Fallback: try finding by text content that looks like a category
@@ -43,7 +43,7 @@ When('I click on a category in the category menu', async function (this: CustomW
       'text=/^(Academic|Career|Design|Programming|General)/',
     );
     const fallbackCount = await fallbackCategories.count();
-    console.log(`   📍 Fallback: Found ${fallbackCount} category items by text`);
+    console.info(`   📍 Fallback: Found ${fallbackCount} category items by text`);
 
     if (fallbackCount > 0) {
       await fallbackCategories.first().click();
@@ -75,7 +75,7 @@ When('I click on a category in the category filter', async function (this: Custo
   );
 
   const count = await categoryItems.count();
-  console.log(`   📍 Found ${count} category filter items`);
+  console.info(`   📍 Found ${count} category filter items`);
 
   if (count === 0) {
     // Fallback: try finding by text content that looks like MCP categories
@@ -83,7 +83,7 @@ When('I click on a category in the category filter', async function (this: Custo
       'text=/^(Developer Tools|Productivity Tools|Utility Tools|Media Generation|Business Services)/',
     );
     const fallbackCount = await fallbackCategories.count();
-    console.log(`   📍 Fallback: Found ${fallbackCount} MCP category items by text`);
+    console.info(`   📍 Fallback: Found ${fallbackCount} MCP category items by text`);
 
     if (fallbackCount > 0) {
       await fallbackCategories.first().click();
@@ -120,11 +120,11 @@ When('I click the next page button', async function (this: CustomWorld) {
   await assistantCards.first().waitFor({ state: 'visible', timeout: 30_000 });
 
   const initialCount = await assistantCards.count();
-  console.log(`   📍 Initial card count: ${initialCount}`);
+  console.info(`   📍 Initial card count: ${initialCount}`);
 
   // The page uses infinite scroll instead of pagination buttons
   // Scroll to bottom to trigger infinite scroll
-  console.log('   📍 Page uses infinite scroll, scrolling to bottom');
+  console.info('   📍 Page uses infinite scroll, scrolling to bottom');
   await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await this.page.waitForTimeout(2000); // Wait for new content to load
 
@@ -280,7 +280,7 @@ When(
     const mcpLinkVisible = await mcpLink.isVisible().catch(() => false);
 
     if (mcpLinkVisible) {
-      console.log('   📍 Found direct MCP link');
+      console.info('   📍 Found direct MCP link');
       await mcpLink.click();
       return;
     }
@@ -303,7 +303,7 @@ When(
     }
 
     // Fallback: click on MCP in the sidebar navigation
-    console.log('   📍 Fallback: clicking MCP in sidebar');
+    console.info('   📍 Fallback: clicking MCP in sidebar');
     const mcpNavItem = this.page
       .locator('nav a:has-text("MCP"), [class*="nav"] a:has-text("MCP")')
       .first();
@@ -313,7 +313,7 @@ When(
     }
 
     // Last resort: navigate directly
-    console.log('   📍 Last resort: direct navigation to /community/mcp');
+    console.info('   📍 Last resort: direct navigation to /community/mcp');
     await this.page.goto('/community/mcp');
   },
 );
@@ -372,8 +372,8 @@ Then(
 
 Then('the URL should contain the category parameter', async function (this: CustomWorld) {
   const currentUrl = this.page.url();
-  console.log(`   📍 Current URL: ${currentUrl}`);
-  console.log(`   📍 Selected category: ${this.testContext.selectedCategory}`);
+  console.info(`   📍 Current URL: ${currentUrl}`);
+  console.info(`   📍 Selected category: ${this.testContext.selectedCategory}`);
 
   // Check if URL contains a category-related parameter
   // The URL format is: /community/agent?category=xxx
@@ -398,11 +398,11 @@ Then('I should see different assistant cards', async function (this: CustomWorld
   await expect(assistantItems.first()).toBeVisible({ timeout: 30_000 });
 
   const currentCount = await assistantItems.count();
-  console.log(`   📍 Current card count: ${currentCount}`);
+  console.info(`   📍 Current card count: ${currentCount}`);
 
   // If we used infinite scroll, check that we have cards (might be same or more)
   if (this.testContext.usedInfiniteScroll) {
-    console.log(
+    console.info(
       `   📍 Used infinite scroll, initial count was: ${this.testContext.initialCardCount}`,
     );
     expect(currentCount).toBeGreaterThan(0);
@@ -416,7 +416,7 @@ Then('the URL should contain the page parameter', async function (this: CustomWo
 
   // If we used infinite scroll, URL won't have page parameter - that's expected
   if (this.testContext.usedInfiniteScroll) {
-    console.log('   📍 Used infinite scroll, page parameter not expected');
+    console.info('   📍 Used infinite scroll, page parameter not expected');
     // Just verify we're still on the assistant page
     expect(currentUrl.includes('/community/agent')).toBeTruthy();
     return;
@@ -488,11 +488,11 @@ Then('I should see the model detail content', async function (this: CustomWorld)
     'text=/Overview|Model Parameters|Related Recommendations|Configuration Guide/',
   );
 
-  console.log('   📍 Waiting for model detail content to load...');
+  console.info('   📍 Waiting for model detail content to load...');
   await expect(modelTabs.first()).toBeVisible({ timeout: 30_000 });
 
   const tabCount = await modelTabs.count();
-  console.log(`   📍 Found ${tabCount} model detail tabs`);
+  console.info(`   📍 Found ${tabCount} model detail tabs`);
 
   expect(tabCount).toBeGreaterThan(0);
 });
@@ -519,11 +519,11 @@ Then('I should see the provider detail content', async function (this: CustomWor
   // Wait for the provider title to appear
   const providerTitle = this.page.locator('h1, h2, [class*="title"]').first();
 
-  console.log('   📍 Waiting for provider detail content to load...');
+  console.info('   📍 Waiting for provider detail content to load...');
   await expect(providerTitle).toBeVisible({ timeout: 30_000 });
 
   const titleText = await providerTitle.textContent();
-  console.log(`   📍 Provider title: ${titleText}`);
+  console.info(`   📍 Provider title: ${titleText}`);
 
   expect(titleText?.trim().length).toBeGreaterThan(0);
 });
@@ -571,13 +571,13 @@ Then('I should be navigated to {string}', async function (this: CustomWorld, exp
   await this.page.waitForTimeout(500); // Extra wait for client-side routing
 
   const currentUrl = this.page.url();
-  console.log(`   📍 Expected path: ${expectedPath}, Current URL: ${currentUrl}`);
+  console.info(`   📍 Expected path: ${expectedPath}, Current URL: ${currentUrl}`);
 
   // Verify that URL contains the expected path
   const urlMatches = currentUrl.includes(expectedPath);
 
   if (!urlMatches) {
-    console.log(`   ⚠️ URL mismatch, but page might still be correct`);
+    console.info(`   ⚠️ URL mismatch, but page might still be correct`);
   }
 
   expect(

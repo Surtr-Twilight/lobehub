@@ -1,7 +1,7 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-import { CustomWorld } from '../../support/world';
+import { type CustomWorld } from '../../support/world';
 
 // ============================================
 // Given Steps (Preconditions)
@@ -23,7 +23,7 @@ When('I click the back button', async function (this: CustomWorld) {
 
   // Store current URL to verify navigation
   const currentUrl = this.page.url();
-  console.log(`   📍 Current URL before back: ${currentUrl}`);
+  console.info(`   📍 Current URL before back: ${currentUrl}`);
 
   // Try to find a back button - look for arrow icon or back text
   // The UI has a back arrow (←) next to the search bar
@@ -34,7 +34,7 @@ When('I click the back button', async function (this: CustomWorld) {
     .first();
 
   const backButtonVisible = await backButton.isVisible().catch(() => false);
-  console.log(`   📍 Back button visible: ${backButtonVisible}`);
+  console.info(`   📍 Back button visible: ${backButtonVisible}`);
 
   if (backButtonVisible) {
     // Click the parent element if it's an SVG icon
@@ -44,10 +44,10 @@ When('I click the back button', async function (this: CustomWorld) {
     } else {
       await backButton.click();
     }
-    console.log('   📍 Clicked back button');
+    console.info('   📍 Clicked back button');
   } else {
     // Use browser back as fallback
-    console.log('   📍 Using browser goBack()');
+    console.info('   📍 Using browser goBack()');
     await this.page.goBack();
   }
 
@@ -55,7 +55,7 @@ When('I click the back button', async function (this: CustomWorld) {
   await this.page.waitForTimeout(500);
 
   const newUrl = this.page.url();
-  console.log(`   📍 URL after back: ${newUrl}`);
+  console.info(`   📍 URL after back: ${newUrl}`);
 });
 
 // ============================================
@@ -142,7 +142,7 @@ Then('I should be on the assistant list page', async function (this: CustomWorld
     currentUrl.endsWith('/community') ||
     currentUrl.includes('/community#');
 
-  console.log(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
+  console.info(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
   expect(isListPage, `Expected URL to be assistant list page, but got: ${currentUrl}`).toBeTruthy();
 });
 
@@ -183,7 +183,7 @@ Then('I should see the model description', async function (this: CustomWorld) {
 
   // Pass if any content area is visible - the description might be a placeholder
   expect(isVisible || true).toBeTruthy();
-  console.log('   📍 Model description area checked');
+  console.info('   📍 Model description area checked');
 });
 
 Then('I should see the model parameters information', async function (this: CustomWorld) {
@@ -210,7 +210,7 @@ Then('I should be on the model list page', async function (this: CustomWorld) {
     currentUrl.endsWith('/community') ||
     currentUrl.includes('/community#');
 
-  console.log(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
+  console.info(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
   expect(isListPage, `Expected URL to be model list page, but got: ${currentUrl}`).toBeTruthy();
 });
 
@@ -274,7 +274,7 @@ Then('I should be on the provider list page', async function (this: CustomWorld)
     currentUrl.endsWith('/community') ||
     currentUrl.includes('/community#');
 
-  console.log(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
+  console.info(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
   expect(isListPage, `Expected URL to be provider list page, but got: ${currentUrl}`).toBeTruthy();
 });
 
@@ -336,6 +336,6 @@ Then('I should be on the MCP list page', async function (this: CustomWorld) {
     currentUrl.endsWith('/community') ||
     currentUrl.includes('/community#');
 
-  console.log(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
+  console.info(`   📍 Current URL: ${currentUrl}, isListPage: ${isListPage}`);
   expect(isListPage, `Expected URL to be MCP list page, but got: ${currentUrl}`).toBeTruthy();
 });

@@ -10,7 +10,7 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-import { CustomWorld, WAIT_TIMEOUT } from '../../support/world';
+import { type CustomWorld, WAIT_TIMEOUT } from '../../support/world';
 
 // ============================================
 // Helper Functions
@@ -89,7 +89,7 @@ async function inputPageName(
   }
 
   await this.page.waitForTimeout(1000);
-  console.log(`   ✅ 已输入新名称 "${newName}"`);
+  console.info(`   ✅ 已输入新名称 "${newName}"`);
 }
 
 // ============================================
@@ -97,21 +97,21 @@ async function inputPageName(
 // ============================================
 
 Given('用户在 Page 页面', async function (this: CustomWorld) {
-  console.log('   📍 Step: 导航到 Page 页面...');
+  console.info('   📍 Step: 导航到 Page 页面...');
   await this.page.goto('/page');
   await this.page.waitForLoadState('networkidle', { timeout: 15_000 });
   await this.page.waitForTimeout(1000);
 
-  console.log('   ✅ 已进入 Page 页面');
+  console.info('   ✅ 已进入 Page 页面');
 });
 
 Given('用户在 Page 页面有一个文稿', async function (this: CustomWorld) {
-  console.log('   📍 Step: 导航到 Page 页面...');
+  console.info('   📍 Step: 导航到 Page 页面...');
   await this.page.goto('/page');
   await this.page.waitForLoadState('networkidle', { timeout: 15_000 });
   await this.page.waitForTimeout(1000);
 
-  console.log('   📍 Step: 通过 UI 创建新文稿...');
+  console.info('   📍 Step: 通过 UI 创建新文稿...');
   // Click the new page button to create via UI (ensures proper server-side creation)
   const newPageButton = this.page.locator('svg.lucide-square-pen').first();
   await newPageButton.click();
@@ -123,37 +123,37 @@ Given('用户在 Page 页面有一个文稿', async function (this: CustomWorld)
   // Create a unique title for this test page
   const uniqueTitle = `E2E Page ${Date.now()}`;
 
-  console.log(`   📍 Step: 重命名为唯一标题 "${uniqueTitle}"...`);
+  console.info(`   📍 Step: 重命名为唯一标题 "${uniqueTitle}"...`);
   // Find the new page in sidebar (use link selector to avoid matching editor title)
   // Sidebar page items are rendered as <a href="/page/xxx"> links
 
   // Debug: check how many links exist
   const allPageLinks = this.page.locator('a[href^="/page/"]');
   const linkCount = await allPageLinks.count();
-  console.log(`   📍 Debug: Found ${linkCount} page links in sidebar`);
+  console.info(`   📍 Debug: Found ${linkCount} page links in sidebar`);
 
   // Find the Untitled page link
   const pageItem = allPageLinks.filter({ hasText: /Untitled|无标题/ }).first();
   const pageItemCount = await allPageLinks.filter({ hasText: /Untitled|无标题/ }).count();
-  console.log(`   📍 Debug: Found ${pageItemCount} Untitled page links`);
+  console.info(`   📍 Debug: Found ${pageItemCount} Untitled page links`);
 
   await expect(pageItem).toBeVisible({ timeout: 5000 });
-  console.log('   📍 Debug: Page item is visible');
+  console.info('   📍 Debug: Page item is visible');
 
   // Right-click to open context menu and rename
   await pageItem.click({ button: 'right' });
-  console.log('   📍 Debug: Right-clicked on page item');
+  console.info('   📍 Debug: Right-clicked on page item');
   await this.page.waitForTimeout(500);
 
   // Debug: check menu items
   const menuItemCount = await this.page.locator('[role="menuitem"]').count();
-  console.log(`   📍 Debug: Found ${menuItemCount} menu items after right-click`);
+  console.info(`   📍 Debug: Found ${menuItemCount} menu items after right-click`);
 
   const renameOption = this.page.getByRole('menuitem', { name: /rename|重命名/i });
   await expect(renameOption).toBeVisible({ timeout: 5000 });
-  console.log('   📍 Debug: Rename option is visible');
+  console.info('   📍 Debug: Rename option is visible');
   await renameOption.click();
-  console.log('   📍 Debug: Clicked rename option');
+  console.info('   📍 Debug: Clicked rename option');
   await this.page.waitForTimeout(800);
 
   // Wait for rename popover to appear and find the input
@@ -169,7 +169,7 @@ Given('用户在 Page 页面有一个文稿', async function (this: CustomWorld)
   for (const selector of inputSelectors) {
     const inputs = this.page.locator(selector);
     const count = await inputs.count();
-    console.log(`   📍 Debug: Selector "${selector}" found ${count} inputs`);
+    console.info(`   📍 Debug: Selector "${selector}" found ${count} inputs`);
     if (count > 0) {
       // Find the visible one
       for (let i = 0; i < count; i++) {
@@ -192,14 +192,14 @@ Given('用户在 Page 页面有一个文稿', async function (this: CustomWorld)
     throw new Error('Could not find popover input for renaming');
   }
 
-  console.log('   📍 Debug: Popover input found');
+  console.info('   📍 Debug: Popover input found');
   await expect(popoverInput).toBeVisible({ timeout: 5000 });
 
   // Clear and input the unique name
   await popoverInput.click();
   await popoverInput.clear();
   await popoverInput.fill(uniqueTitle);
-  console.log(`   📍 Debug: Filled input with "${uniqueTitle}"`);
+  console.info(`   📍 Debug: Filled input with "${uniqueTitle}"`);
 
   // Press Enter to confirm
   await popoverInput.press('Enter');
@@ -213,16 +213,16 @@ Given('用户在 Page 页面有一个文稿', async function (this: CustomWorld)
   this.testContext.targetItemTitle = uniqueTitle;
   this.testContext.targetType = 'page';
 
-  console.log(`   ✅ 找到文稿: ${uniqueTitle}`);
+  console.info(`   ✅ 找到文稿: ${uniqueTitle}`);
 });
 
 Given('用户在 Page 页面有一个文稿 {string}', async function (this: CustomWorld, title: string) {
-  console.log('   📍 Step: 导航到 Page 页面...');
+  console.info('   📍 Step: 导航到 Page 页面...');
   await this.page.goto('/page');
   await this.page.waitForLoadState('networkidle', { timeout: 15_000 });
   await this.page.waitForTimeout(1000);
 
-  console.log('   📍 Step: 通过 UI 创建新文稿...');
+  console.info('   📍 Step: 通过 UI 创建新文稿...');
   // Click the new page button to create via UI
   const newPageButton = this.page.locator('svg.lucide-square-pen').first();
   await newPageButton.click();
@@ -234,7 +234,7 @@ Given('用户在 Page 页面有一个文稿 {string}', async function (this: Cus
   // Default title is "无标题" (Untitled) - support both languages
   const defaultTitleRegex = /^(无标题|Untitled)$/;
 
-  console.log(`   📍 Step: 通过右键菜单重命名文稿为 "${title}"...`);
+  console.info(`   📍 Step: 通过右键菜单重命名文稿为 "${title}"...`);
   // Find the new page in sidebar (use link selector to avoid matching editor title)
   // Sidebar page items are rendered as <a href="/page/xxx"> links
   const pageItem = this.page
@@ -296,14 +296,14 @@ Given('用户在 Page 页面有一个文稿 {string}', async function (this: Cus
   await popoverInput.press('Enter');
   await this.page.waitForTimeout(1000);
 
-  console.log('   📍 Step: 查找文稿...');
+  console.info('   📍 Step: 查找文稿...');
   const renamedItem = this.page.getByText(title, { exact: true }).first();
   await expect(renamedItem).toBeVisible({ timeout: WAIT_TIMEOUT });
 
   this.testContext.targetItemTitle = title;
   this.testContext.targetType = 'page';
 
-  console.log(`   ✅ 找到文稿: ${title}`);
+  console.info(`   ✅ 找到文稿: ${title}`);
 });
 
 // ============================================
@@ -311,7 +311,7 @@ Given('用户在 Page 页面有一个文稿 {string}', async function (this: Cus
 // ============================================
 
 When('用户点击新建文稿按钮', async function (this: CustomWorld) {
-  console.log('   📍 Step: 点击新建文稿按钮...');
+  console.info('   📍 Step: 点击新建文稿按钮...');
 
   // Look for the SquarePen icon button (new page button)
   const newPageButton = this.page.locator('svg.lucide-square-pen').first();
@@ -331,11 +331,11 @@ When('用户点击新建文稿按钮', async function (this: CustomWorld) {
   }
 
   await this.page.waitForTimeout(1000);
-  console.log('   ✅ 已点击新建文稿按钮');
+  console.info('   ✅ 已点击新建文稿按钮');
 });
 
 When('用户右键点击该文稿', async function (this: CustomWorld) {
-  console.log('   📍 Step: 右键点击文稿...');
+  console.info('   📍 Step: 右键点击文稿...');
 
   const title = this.testContext.targetItemTitle || this.testContext.createdPageTitle;
   // Find the page item by its title text, then find the parent clickable block
@@ -349,13 +349,13 @@ When('用户右键点击该文稿', async function (this: CustomWorld) {
 
   // Debug: check what menus are visible
   const menuItems = await this.page.locator('[role="menuitem"]').count();
-  console.log(`   📍 Debug: Found ${menuItems} menu items after right-click`);
+  console.info(`   📍 Debug: Found ${menuItems} menu items after right-click`);
 
-  console.log('   ✅ 已右键点击文稿');
+  console.info('   ✅ 已右键点击文稿');
 });
 
 When('用户在菜单中选择复制', async function (this: CustomWorld) {
-  console.log('   📍 Step: 选择复制选项...');
+  console.info('   📍 Step: 选择复制选项...');
 
   // Look for duplicate option (复制 or Duplicate)
   const duplicateOption = this.page.getByRole('menuitem', { name: /复制|duplicate/i });
@@ -363,18 +363,18 @@ When('用户在菜单中选择复制', async function (this: CustomWorld) {
   await duplicateOption.click();
   await this.page.waitForTimeout(1000);
 
-  console.log('   ✅ 已选择复制选项');
+  console.info('   ✅ 已选择复制选项');
 });
 
 When('用户输入新的文稿名称 {string}', async function (this: CustomWorld, newName: string) {
-  console.log(`   📍 Step: 输入新名称 "${newName}"...`);
+  console.info(`   📍 Step: 输入新名称 "${newName}"...`);
   await inputPageName.call(this, newName, false);
 });
 
 When(
   '用户输入新的文稿名称 {string} 并按 Enter',
   async function (this: CustomWorld, newName: string) {
-    console.log(`   📍 Step: 输入新名称 "${newName}" 并按 Enter...`);
+    console.info(`   📍 Step: 输入新名称 "${newName}" 并按 Enter...`);
     await inputPageName.call(this, newName, true);
   },
 );
@@ -384,7 +384,7 @@ When(
 // ============================================
 
 Then('应该创建一个新的文稿', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证新文稿已创建...');
+  console.info('   📍 Step: 验证新文稿已创建...');
 
   await this.page.waitForTimeout(1000);
 
@@ -392,11 +392,11 @@ Then('应该创建一个新的文稿', async function (this: CustomWorld) {
   const currentUrl = this.page.url();
   expect(currentUrl).toMatch(/\/page\/.+/);
 
-  console.log('   ✅ 新文稿已创建');
+  console.info('   ✅ 新文稿已创建');
 });
 
 Then('文稿列表中应该显示新文稿', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证文稿列表中显示新文稿...');
+  console.info('   📍 Step: 验证文稿列表中显示新文稿...');
 
   await this.page.waitForTimeout(500);
 
@@ -405,11 +405,11 @@ Then('文稿列表中应该显示新文稿', async function (this: CustomWorld) 
   const untitledText = this.page.getByText(/无标题|untitled/i).first();
   await expect(untitledText).toBeVisible({ timeout: 5000 });
 
-  console.log('   ✅ 文稿列表中显示新文稿');
+  console.info('   ✅ 文稿列表中显示新文稿');
 });
 
 Then('该文稿名称应该更新为 {string}', async function (this: CustomWorld, expectedName: string) {
-  console.log(`   📍 Step: 验证名称为 "${expectedName}"...`);
+  console.info(`   📍 Step: 验证名称为 "${expectedName}"...`);
 
   await this.page.waitForTimeout(1000);
 
@@ -417,11 +417,11 @@ Then('该文稿名称应该更新为 {string}', async function (this: CustomWorl
   const renamedItem = this.page.getByText(expectedName, { exact: true }).first();
   await expect(renamedItem).toBeVisible({ timeout: 5000 });
 
-  console.log(`   ✅ 名称已更新为 "${expectedName}"`);
+  console.info(`   ✅ 名称已更新为 "${expectedName}"`);
 });
 
 Then('文稿列表中应该出现 {string}', async function (this: CustomWorld, expectedName: string) {
-  console.log(`   📍 Step: 验证文稿列表中出现 "${expectedName}"...`);
+  console.info(`   📍 Step: 验证文稿列表中出现 "${expectedName}"...`);
 
   await this.page.waitForTimeout(2000);
 
@@ -438,20 +438,20 @@ Then('文稿列表中应该出现 {string}', async function (this: CustomWorld, 
   if ((await duplicatedItem.count()) === 0) {
     // Fallback: check if there are at least 2 pages with similar name
     const similarPages = this.page.getByText(expectedName.replace(/\s*\(Copy\)$/, '')).all();
-    // eslint-disable-next-line unicorn/no-await-expression-member
+
     const count = (await similarPages).length;
-    console.log(`   📍 Debug: Found ${count} pages with similar name`);
+    console.info(`   📍 Debug: Found ${count} pages with similar name`);
     expect(count).toBeGreaterThanOrEqual(2);
-    console.log(`   ✅ 文稿列表中出现多个相似名称的文稿`);
+    console.info(`   ✅ 文稿列表中出现多个相似名称的文稿`);
     return;
   }
 
   await expect(duplicatedItem).toBeVisible({ timeout: WAIT_TIMEOUT });
-  console.log(`   ✅ 文稿列表中出现 "${expectedName}"`);
+  console.info(`   ✅ 文稿列表中出现 "${expectedName}"`);
 });
 
 Then('该文稿应该从列表中移除', async function (this: CustomWorld) {
-  console.log('   📍 Step: 验证文稿已移除...');
+  console.info('   📍 Step: 验证文稿已移除...');
 
   await this.page.waitForTimeout(1000);
 
@@ -461,5 +461,5 @@ Then('该文稿应该从列表中移除', async function (this: CustomWorld) {
     await expect(deletedItem).not.toBeVisible({ timeout: 5000 });
   }
 
-  console.log('   ✅ 文稿已从列表中移除');
+  console.info('   ✅ 文稿已从列表中移除');
 });
