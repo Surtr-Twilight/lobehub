@@ -21,6 +21,9 @@ const TabBar = () => {
   const { tabs, activeTabId } = useResolvedTabs();
   const activateTab = useElectronStore((s) => s.activateTab);
   const removeTab = useElectronStore((s) => s.removeTab);
+  const closeOtherTabs = useElectronStore((s) => s.closeOtherTabs);
+  const closeLeftTabs = useElectronStore((s) => s.closeLeftTabs);
+  const closeRightTabs = useElectronStore((s) => s.closeRightTabs);
 
   const handleActivate = useCallback(
     (id: string, url: string) => {
@@ -29,6 +32,19 @@ const TabBar = () => {
     },
     [activateTab, navigate],
   );
+
+  const navigateToActive = useCallback(() => {
+    const { activeTabId: newActiveId, tabs: newTabs } = useElectronStore.getState();
+    if (newActiveId) {
+      const target = newTabs.find((t) => t.id === newActiveId);
+      if (target) {
+        const resolved = tabs.find((t) => t.reference.id === newActiveId);
+        if (resolved) navigate(resolved.url);
+      }
+    } else {
+      navigate('/');
+    }
+  }, [tabs, navigate]);
 
   const handleClose = useCallback(
     (id: string) => {
@@ -47,6 +63,31 @@ const TabBar = () => {
       }
     },
     [activeTabId, removeTab, tabs, navigate],
+  );
+
+  const handleCloseOthers = useCallback(
+    (id: string) => {
+      closeOtherTabs(id);
+      const target = tabs.find((t) => t.reference.id === id);
+      if (target) navigate(target.url);
+    },
+    [closeOtherTabs, tabs, navigate],
+  );
+
+  const handleCloseLeft = useCallback(
+    (id: string) => {
+      closeLeftTabs(id);
+      navigateToActive();
+    },
+    [closeLeftTabs, navigateToActive],
+  );
+
+  const handleCloseRight = useCallback(
+    (id: string) => {
+      closeRightTabs(id);
+      navigateToActive();
+    },
+    [closeRightTabs, navigateToActive],
   );
 
   useEffect(() => {
@@ -77,13 +118,18 @@ const TabBar = () => {
         style: { alignItems: 'center', flexDirection: 'row', gap: TAB_GAP },
       }}
     >
-      {tabs.map((tab) => (
+      {tabs.map((tab, index) => (
         <TabItem
+          index={index}
           isActive={tab.reference.id === activeTabId}
           item={tab}
           key={tab.reference.id}
+          totalCount={tabs.length}
           onActivate={handleActivate}
           onClose={handleClose}
+          onCloseLeft={handleCloseLeft}
+          onCloseOthers={handleCloseOthers}
+          onCloseRight={handleCloseRight}
         />
       ))}
     </ScrollArea>

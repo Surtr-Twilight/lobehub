@@ -108,6 +108,39 @@ export class TabPagesActionImpl {
     return newActiveId;
   };
 
+  closeLeftTabs = (id: string): void => {
+    const { tabs, activeTabId } = this.#get();
+    const index = tabs.findIndex((t) => t.id === id);
+    if (index <= 0) return;
+
+    const newTabs = tabs.slice(index);
+    const newActiveId = newTabs.some((t) => t.id === activeTabId) ? activeTabId : id;
+
+    this.#set({ activeTabId: newActiveId, tabs: newTabs }, false, 'closeLeftTabs');
+    this.#persist();
+  };
+
+  closeOtherTabs = (id: string): void => {
+    const { tabs } = this.#get();
+    const target = tabs.find((t) => t.id === id);
+    if (!target) return;
+
+    this.#set({ activeTabId: id, tabs: [target] }, false, 'closeOtherTabs');
+    this.#persist();
+  };
+
+  closeRightTabs = (id: string): void => {
+    const { tabs, activeTabId } = this.#get();
+    const index = tabs.findIndex((t) => t.id === id);
+    if (index < 0 || index >= tabs.length - 1) return;
+
+    const newTabs = tabs.slice(0, index + 1);
+    const newActiveId = newTabs.some((t) => t.id === activeTabId) ? activeTabId : id;
+
+    this.#set({ activeTabId: newActiveId, tabs: newTabs }, false, 'closeRightTabs');
+    this.#persist();
+  };
+
   reorderTabs = (fromIndex: number, toIndex: number): void => {
     const { tabs } = this.#get();
     if (fromIndex < 0 || fromIndex >= tabs.length) return;
