@@ -1,10 +1,11 @@
 import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
+import { appEnv } from '@/envs/app';
 import { getTrustedClientTokenForSession } from '@/libs/trusted-client';
 import { MarketService } from '@/server/services/market';
 
-const MARKET_BASE_URL = process.env.NEXT_PUBLIC_MARKET_BASE_URL || 'https://market.lobehub.com';
+const MARKET_BASE_URL = appEnv.MARKET_BASE_URL || 'https://market.lobehub.com';
 
 type RouteContext = {
   params: Promise<{

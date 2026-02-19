@@ -1,7 +1,7 @@
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 
-import { withElectronProtocolIfElectron } from '@/const/protocol';
+import { morphApiURI } from '@/const/protocol';
 import { type ToolsRouter } from '@/server/routers/tools';
 
 export const toolsClient = createTRPCClient<ToolsRouter>({
@@ -15,7 +15,7 @@ export const toolsClient = createTRPCClient<ToolsRouter>({
       },
       maxURLLength: 2083,
       transformer: superjson,
-      url: withElectronProtocolIfElectron('/trpc/tools'),
+      url: morphApiURI('/trpc/tools'),
     }),
   ],
 });

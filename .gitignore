@@ -83,6 +83,7 @@ public/sw*
 public/swe-worker*
 
 # Generated files
+public/spa/
 public/*.js
 public/sitemap.xml
 public/sitemap-index.xml
@@ -128,3 +129,4 @@ i18n-unused-keys-report.json
 .vitest-reports
 
 pnpm-lock.yaml
+.turbo

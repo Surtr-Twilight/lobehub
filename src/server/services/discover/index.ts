@@ -65,6 +65,7 @@ import { cloneDeep, countBy, isString, merge, uniq, uniqBy } from 'es-toolkit/co
 import matter from 'gray-matter';
 import urlJoin from 'url-join';
 
+import { appEnv } from '@/envs/app';
 import { type TrustedClientUserInfo } from '@/libs/trusted-client';
 import { normalizeLocale } from '@/locales/resources';
 import { AssistantStore } from '@/server/modules/AssistantStore';
@@ -94,7 +95,7 @@ export class DiscoverService {
 
     log(
       'DiscoverService initialized with market baseURL: %s, hasAuth: %s, userId: %s',
-      process.env.NEXT_PUBLIC_MARKET_BASE_URL,
+      appEnv.MARKET_BASE_URL,
       !!(accessToken || userInfo),
       userInfo?.userId,
     );

@@ -4,7 +4,7 @@ import { Flexbox, Segmented, Skeleton, Tag } from '@lobehub/ui';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Title from '@/app/[variants]/(main)/community/features/Title';
+import Title from '@/routes/(main)/community/features/Title';
 import { DetailProvider } from '@/features/MCPPluginDetail/DetailProvider';
 import Tools from '@/features/MCPPluginDetail/Schema/Tools';
 import { ModeType } from '@/features/MCPPluginDetail/Schema/types';

@@ -218,9 +218,9 @@ const assertMetadataManifestRemoved = (code: string) =>
   !/\bmanifest\s*:/.test(code) && !/\bmetadataBase\s*:/.test(code);
 
 export const modifyAppCode = async (TEMP_DIR: string) => {
-  // 1. Replace src/app/[variants]/page.tsx with a desktop-only entry
-  const variantsPagePath = path.join(TEMP_DIR, 'src/app/[variants]/page.tsx');
-  console.log('  Processing src/app/[variants]/page.tsx...');
+  // 1. Replace src/routes/page.tsx with a desktop-only entry
+  const variantsPagePath = path.join(TEMP_DIR, 'src/routes/page.tsx');
+  console.log('  Processing src/routes/page.tsx...');
   await writeFileEnsuring({
     filePath: variantsPagePath,
     name: 'modifyAppCode:variantsPage',
@@ -238,9 +238,9 @@ export const modifyAppCode = async (TEMP_DIR: string) => {
     assertAfter: assertDevPanelStripped,
   });
 
-  // 3. Delete src/app/[variants]/(main)/settings/security directory
-  const securityDirPath = path.join(TEMP_DIR, 'src/app/[variants]/(main)/settings/security');
-  console.log('  Deleting src/app/[variants]/(main)/settings/security directory...');
+  // 3. Delete src/routes/(main)/settings/security directory
+  const securityDirPath = path.join(TEMP_DIR, 'src/routes/(main)/settings/security');
+  console.log('  Deleting src/routes/(main)/settings/security directory...');
   await removePathEnsuring({
     name: 'modifyAppCode:deleteSecurityDir',
     path: securityDirPath,
@@ -249,9 +249,9 @@ export const modifyAppCode = async (TEMP_DIR: string) => {
   // 4. Remove Security tab wiring from SettingsContent
   const settingsContentPath = path.join(
     TEMP_DIR,
-    'src/app/[variants]/(main)/settings/features/SettingsContent.tsx',
+    'src/routes/(main)/settings/features/SettingsContent.tsx',
   );
-  console.log('  Processing src/app/[variants]/(main)/settings/features/SettingsContent.tsx...');
+  console.log('  Processing src/routes/(main)/settings/features/SettingsContent.tsx...');
   await updateFile({
     filePath: settingsContentPath,
     name: 'modifyAppCode:removeSecurityTab',
@@ -259,9 +259,9 @@ export const modifyAppCode = async (TEMP_DIR: string) => {
     assertAfter: assertSecurityTabRemoved,
   });
 
-  // 5. Remove SpeedInsights and Analytics from src/app/[variants]/layout.tsx
-  const variantsLayoutPath = path.join(TEMP_DIR, 'src/app/[variants]/layout.tsx');
-  console.log('  Processing src/app/[variants]/layout.tsx...');
+  // 5. Remove SpeedInsights and Analytics from src/routes/layout.tsx
+  const variantsLayoutPath = path.join(TEMP_DIR, 'src/routes/layout.tsx');
+  console.log('  Processing src/routes/layout.tsx...');
   await updateFile({
     filePath: variantsLayoutPath,
     name: 'modifyAppCode:removeSpeedInsightsAndAnalytics',
@@ -280,8 +280,8 @@ export const modifyAppCode = async (TEMP_DIR: string) => {
   });
 
   // 7. Remove manifest from metadata
-  const metadataPath = path.join(TEMP_DIR, 'src/app/[variants]/metadata.ts');
-  console.log('  Processing src/app/[variants]/metadata.ts...');
+  const metadataPath = path.join(TEMP_DIR, 'src/routes/metadata.ts');
+  console.log('  Processing src/routes/metadata.ts...');
   await updateFile({
     filePath: metadataPath,
     name: 'modifyAppCode:removeManifestFromMetadata',
@@ -292,11 +292,11 @@ export const modifyAppCode = async (TEMP_DIR: string) => {
 
 if (isDirectRun(import.meta.url)) {
   await runStandalone('modifyAppCode', modifyAppCode, [
-    { lang: Lang.Tsx, path: 'src/app/[variants]/page.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/page.tsx' },
     { lang: Lang.Tsx, path: 'src/layout/GlobalProvider/index.tsx' },
-    { lang: Lang.Tsx, path: 'src/app/[variants]/(main)/settings/features/SettingsContent.tsx' },
-    { lang: Lang.Tsx, path: 'src/app/[variants]/layout.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/(main)/settings/features/SettingsContent.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/layout.tsx' },
     { lang: Lang.Tsx, path: 'src/components/mdx/Image.tsx' },
-    { lang: Lang.Tsx, path: 'src/app/[variants]/metadata.ts' },
+    { lang: Lang.Tsx, path: 'src/routes/metadata.ts' },
   ]);
 }

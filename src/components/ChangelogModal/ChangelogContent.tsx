@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import urlJoin from 'url-join';
 
-import { CustomMDX } from '@/components/mdx';
+import { SPAMdx } from '@/components/mdx/SPAMdx';
 import { OFFICIAL_SITE } from '@/const/url';
 import { type Locales } from '@/locales/resources';
 import { ChangelogService } from '@/server/services/changelog';
@@ -54,7 +54,7 @@ const PostItem = ({ id, versionRange, locale, showDivider = true }: PostItemProp
           />
         )}
         <Suspense fallback={<div>Loading...</div>}>
-          <CustomMDX source={data.content} />
+          <SPAMdx source={data.content} />
         </Suspense>
         <VersionTag range={versionRange} />
       </Typography>

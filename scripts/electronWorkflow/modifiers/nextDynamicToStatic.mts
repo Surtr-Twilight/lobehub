@@ -193,7 +193,7 @@ const transformFile = (code: string, filePath: string): string => {
 export const convertNextDynamicToStatic = async (TEMP_DIR: string) => {
   const appDirs = [
     { dir: path.join(TEMP_DIR, 'src/app/(variants)'), label: 'src/app/(variants)' },
-    { dir: path.join(TEMP_DIR, 'src/app/[variants]'), label: 'src/app/[variants]' },
+    { dir: path.join(TEMP_DIR, 'src/routes'), label: 'src/routes' },
   ];
 
   console.log('  Processing next/dynamic → static imports...');

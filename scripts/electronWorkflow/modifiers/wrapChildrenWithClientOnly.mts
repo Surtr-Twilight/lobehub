@@ -4,7 +4,7 @@ import path from 'node:path';
 import { invariant, isDirectRun, runStandalone, updateFile } from './utils.mjs';
 
 export const wrapChildrenWithClientOnly = async (TEMP_DIR: string) => {
-  const layoutPath = path.join(TEMP_DIR, 'src/app/[variants]/layout.tsx');
+  const layoutPath = path.join(TEMP_DIR, 'src/routes/layout.tsx');
 
   console.log('  Wrapping children with ClientOnly in layout.tsx...');
 
@@ -77,6 +77,6 @@ export const wrapChildrenWithClientOnly = async (TEMP_DIR: string) => {
 
 if (isDirectRun(import.meta.url)) {
   await runStandalone('wrapChildrenWithClientOnly', wrapChildrenWithClientOnly, [
-    { lang: Lang.Tsx, path: 'src/app/[variants]/layout.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/layout.tsx' },
   ]);
 }

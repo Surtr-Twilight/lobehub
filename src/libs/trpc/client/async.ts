@@ -1,7 +1,7 @@
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 
-import { withElectronProtocolIfElectron } from '@/const/protocol';
+import { morphApiURI } from '@/const/protocol';
 import { type AsyncRouter } from '@/server/routers/async';
 
 export const asyncClient = createTRPCClient<AsyncRouter>({
@@ -9,7 +9,7 @@ export const asyncClient = createTRPCClient<AsyncRouter>({
     httpBatchLink({
       maxURLLength: 2083,
       transformer: superjson,
-      url: withElectronProtocolIfElectron('/trpc/async'),
+      url: morphApiURI('/trpc/async'),
     }),
   ],
 });

@@ -34,7 +34,12 @@ const Analytics = () => {
       {!!analyticsEnv.REACT_SCAN_MONITOR_API_KEY && (
         <ReactScan apiKey={analyticsEnv.REACT_SCAN_MONITOR_API_KEY} />
       )}
-      {isDesktop && <Desktop />}
+      {isDesktop && (
+        <Desktop
+          baseUrl={analyticsEnv.DESKTOP_UMAMI_BASE_URL}
+          projectId={analyticsEnv.DESKTOP_PROJECT_ID}
+        />
+      )}
     </>
   );
 };

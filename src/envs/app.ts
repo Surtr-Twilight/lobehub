@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix */
-import { createEnv } from '@t3-oss/env-nextjs';
+import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
 
 const isInVercel = process.env.VERCEL === '1';
@@ -36,8 +36,10 @@ const PLUGINS_INDEX_URL = 'https://registry.npmmirror.com/@lobehub/plugins-index
 
 export const getAppConfig = () => {
   return createEnv({
+    clientPrefix: 'NEXT_PUBLIC_',
     client: {
       NEXT_PUBLIC_ENABLE_SENTRY: z.boolean(),
+      NEXT_PUBLIC_MARKET_BASE_URL: z.string().optional(),
     },
     server: {
       AGENTS_INDEX_URL: z.string().url(),
@@ -87,6 +89,7 @@ export const getAppConfig = () => {
     runtimeEnv: {
       // Sentry
       NEXT_PUBLIC_ENABLE_SENTRY: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
+      NEXT_PUBLIC_MARKET_BASE_URL: process.env.NEXT_PUBLIC_MARKET_BASE_URL,
 
       AGENTS_INDEX_URL: !!process.env.AGENTS_INDEX_URL
         ? process.env.AGENTS_INDEX_URL
@@ -113,7 +116,7 @@ export const getAppConfig = () => {
 
       SSRF_ALLOW_PRIVATE_IP_ADDRESS: process.env.SSRF_ALLOW_PRIVATE_IP_ADDRESS === '1',
       SSRF_ALLOW_IP_ADDRESS_LIST: process.env.SSRF_ALLOW_IP_ADDRESS_LIST,
-      MARKET_BASE_URL: process.env.MARKET_BASE_URL,
+      MARKET_BASE_URL: process.env.MARKET_BASE_URL || process.env.NEXT_PUBLIC_MARKET_BASE_URL,
 
       MARKET_TRUSTED_CLIENT_SECRET: process.env.MARKET_TRUSTED_CLIENT_SECRET,
       MARKET_TRUSTED_CLIENT_ID: process.env.MARKET_TRUSTED_CLIENT_ID,

@@ -6,7 +6,7 @@ import debug from 'debug';
 import { type ModelProvider } from 'model-bank';
 import superjson from 'superjson';
 
-import { withElectronProtocolIfElectron } from '@/const/protocol';
+import { morphApiURI } from '@/const/protocol';
 import { isDesktop } from '@/const/version';
 import { type LambdaRouter } from '@/server/routers/lambda';
 
@@ -114,7 +114,7 @@ const linkOptions = {
     return headers;
   },
   transformer: superjson,
-  url: withElectronProtocolIfElectron('/trpc/lambda'),
+  url: morphApiURI('/trpc/lambda'),
 };
 
 // Procedures that should skip batching for faster initial load

@@ -144,22 +144,22 @@ const partialBuildPages = [
   // {
   //   name: 'changelog',
   //   disabled: isDesktop,
-  //   paths: ['src/app/[variants]/(main)/changelog'],
+  //   paths: ['src/routes/(main)/changelog'],
   // },
   {
     name: 'auth',
     disabled: isDesktop,
-    paths: ['src/app/[variants]/(auth)'],
+    paths: ['src/app/(auth)'],
   },
   // {
   //   name: 'mobile',
   //   disabled: isDesktop,
-  //   paths: ['src/app/[variants]/(main)/(mobile)'],
+  //   paths: ['src/routes/(main)/(mobile)'],
   // },
   {
     name: 'oauth',
     disabled: isDesktop,
-    paths: ['src/app/[variants]/oauth', 'src/app/(backend)/oidc'],
+    paths: ['src/app/(auth)/oauth', 'src/app/(backend)/oidc'],
   },
   {
     name: 'api-webhooks',

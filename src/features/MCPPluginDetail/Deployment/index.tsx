@@ -30,7 +30,7 @@ import Descriptions from '@/components/Descriptions';
 import InlineTable from '@/components/InlineTable';
 import { markdownToTxt } from '@/utils/markdownToTxt';
 
-import Title from '../../../app/[variants]/(main)/community/features/Title';
+import Title from '../../../routes/(main)/community/features/Title';
 import InstallationIcon from '../../../components/MCPDepsIcon';
 import CollapseDesc from '../CollapseDesc';
 import CollapseLayout from '../CollapseLayout';

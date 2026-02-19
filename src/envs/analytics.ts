@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix */
-import { createEnv } from '@t3-oss/env-nextjs';
+import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
 
 export const getAnalyticsConfig = () => {
@@ -28,6 +28,9 @@ export const getAnalyticsConfig = () => {
       GOOGLE_ANALYTICS_MEASUREMENT_ID: z.string().optional(),
 
       REACT_SCAN_MONITOR_API_KEY: z.string().optional(),
+
+      DESKTOP_UMAMI_BASE_URL: z.string().optional(),
+      DESKTOP_PROJECT_ID: z.string().optional(),
     },
     runtimeEnv: {
       // Plausible Analytics
@@ -61,6 +64,9 @@ export const getAnalyticsConfig = () => {
       // React Scan Monitor
       // https://dashboard.react-scan.com
       REACT_SCAN_MONITOR_API_KEY: process.env.REACT_SCAN_MONITOR_API_KEY,
+
+      DESKTOP_UMAMI_BASE_URL: process.env.NEXT_PUBLIC_DESKTOP_UMAMI_BASE_URL,
+      DESKTOP_PROJECT_ID: process.env.NEXT_PUBLIC_DESKTOP_PROJECT_ID,
     },
   });
 };

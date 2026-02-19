@@ -3,7 +3,6 @@ import { uuid } from '@lobechat/utils';
 import dayjs from 'dayjs';
 import { sha256 } from 'js-sha256';
 
-import { fileEnv } from '@/envs/file';
 import { lambdaClient } from '@/libs/trpc/client';
 import { API_ENDPOINTS } from '@/services/_url';
 import { type FileMetadata, type UploadBase64ToS3Result } from '@/types/files';
@@ -32,7 +31,8 @@ const generateFilePathMetadata = (
 
   // Generate timestamp-based directory path
   const date = (Date.now() / 1000 / 60 / 60).toFixed(0);
-  const dirname = `${options.directory || fileEnv.NEXT_PUBLIC_S3_FILE_PATH}/${date}`;
+  const s3FilePath = window.__SERVER_CONFIG__?.clientEnv?.s3FilePath || 'files';
+  const dirname = `${options.directory || s3FilePath}/${date}`;
   const pathname = options.pathname ?? `${dirname}/${filename}`;
 
   return {

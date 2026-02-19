@@ -50,7 +50,7 @@ const generateStaticComponentMap = (imports: DynamicImportInfo[]): string => {
 export const convertSettingsContentToStatic = async (TEMP_DIR: string) => {
   const filePath = path.join(
     TEMP_DIR,
-    'src/app/[variants]/(main)/settings/features/SettingsContent.tsx',
+    'src/routes/(main)/settings/features/SettingsContent.tsx',
   );
 
   console.log('  Processing SettingsContent.tsx dynamic imports...');
@@ -125,6 +125,6 @@ export const convertSettingsContentToStatic = async (TEMP_DIR: string) => {
 
 if (isDirectRun(import.meta.url)) {
   await runStandalone('convertSettingsContentToStatic', convertSettingsContentToStatic, [
-    { lang: Lang.Tsx, path: 'src/app/[variants]/(main)/settings/features/SettingsContent.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/(main)/settings/features/SettingsContent.tsx' },
   ]);
 }

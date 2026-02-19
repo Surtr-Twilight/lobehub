@@ -4,6 +4,7 @@ packages:
   - e2e
   - apps/desktop/src/main
 
+
 onlyBuiltDependencies:
   - '@vercel/speed-insights'
   - '@lobehub/editor'

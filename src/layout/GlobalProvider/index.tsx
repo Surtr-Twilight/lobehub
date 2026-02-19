@@ -5,12 +5,10 @@ import { type ReactNode } from 'react';
 import { Suspense } from 'react';
 
 import { ReferralProvider } from '@/business/client/ReferralProvider';
-import { LobeAnalyticsProviderWrapper } from '@/components/Analytics/LobeAnalyticsProviderWrapper';
 import { DragUploadProvider } from '@/components/DragUploadZone/DragUploadProvider';
 import { getServerFeatureFlagsValue } from '@/config/featureFlags';
 import { isDesktop } from '@/const/version';
 import { appEnv } from '@/envs/app';
-import DevPanel from '@/features/DevPanel';
 import { getServerGlobalConfig } from '@/server/globalConfig';
 import { ServerConfigStoreProvider } from '@/store/serverConfig/Provider';
 import { getAntdLocale } from '@/utils/locale';
@@ -76,7 +74,8 @@ const GlobalLayout = async ({
                     <DragUploadProvider>
                       <LazyMotion features={domMax}>
                         <TooltipGroup layoutAnimation={false}>
-                          <LobeAnalyticsProviderWrapper>{children}</LobeAnalyticsProviderWrapper>
+                          {/* <LobeAnalyticsProviderWrapper>{children}</LobeAnalyticsProviderWrapper> */}
+                          {children}
                         </TooltipGroup>
                         <ModalHost />
                         <ToastHost />
@@ -89,7 +88,6 @@ const GlobalLayout = async ({
               <Suspense>
                 {ENABLE_BUSINESS_FEATURES ? <ReferralProvider /> : null}
                 <ImportSettings />
-                {process.env.NODE_ENV === 'development' && <DevPanel />}
               </Suspense>
             </ServerConfigStoreProvider>
           </AppTheme>

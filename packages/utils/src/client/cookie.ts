@@ -21,3 +21,10 @@ export const setCookie = (
     document.cookie = `${key}=${value};expires=${expires};path=/;`;
   }
 };
+
+export const getCookie = (key: string) => {
+  return document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(`${key}=`))
+    ?.split('=')[1];
+};

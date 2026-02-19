@@ -10,19 +10,25 @@ import { normalizeLocale } from '@/locales/resources';
 import { isOnServerSide } from '@/utils/env';
 import { unwrapESMModule } from '@/utils/esm/unwrapESMModule';
 
+import type { LoadI18nNamespaceModuleParams } from '../utils/i18n/loadI18nNamespaceModule';
 import { loadI18nNamespaceModule } from '../utils/i18n/loadI18nNamespaceModule';
 
 const { I18N_DEBUG, I18N_DEBUG_BROWSER, I18N_DEBUG_SERVER } = getDebugConfig();
 const debugMode = (I18N_DEBUG ?? isOnServerSide) ? I18N_DEBUG_SERVER : I18N_DEBUG_BROWSER;
 
-export const createI18nNext = (lang?: string) => {
+type LoadNamespace = (params: LoadI18nNamespaceModuleParams) => Promise<unknown>;
+
+export const createI18nNext = (
+  lang?: string,
+  loadNamespace: LoadNamespace = loadI18nNamespaceModule,
+) => {
   const instance = i18n
     .use(initReactI18next)
     .use(LanguageDetector)
     .use(
       resourcesToBackend(async (lng: string, ns: string) => {
         return unwrapESMModule(
-          await loadI18nNamespaceModule({
+          await loadNamespace({
             defaultLang: DEFAULT_LANG,
             lng,
             normalizeLocale,

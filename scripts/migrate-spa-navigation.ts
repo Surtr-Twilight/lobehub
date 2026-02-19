@@ -4,9 +4,9 @@
  * to React Router version hooks.
  *
  * For files in (main) directory:
- * - usePathname -> @/app/[variants]/(main)/hooks/usePathname
- * - useSearchParams -> @/app/[variants]/(main)/hooks/useSearchParams
- * - useRouter -> @/app/[variants]/(main)/hooks/useRouter
+ * - usePathname -> @/routes/(main)/hooks/usePathname
+ * - useSearchParams -> @/routes/(main)/hooks/useSearchParams
+ * - useRouter -> @/routes/(main)/hooks/useRouter
  *
  * @see RFC 147: LOBE-2850 - Phase 3
  */
@@ -19,14 +19,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Files that should be migrated to React Router version
 const SPA_FILES = [
   // (main) directory files using @/libs/next/navigation
-  'src/app/[variants]/(main)/community/_layout/Sidebar/Header/Nav.tsx',
-  'src/app/[variants]/(main)/group/_layout/Sidebar/Header/Nav.tsx',
-  'src/app/[variants]/(main)/group/_layout/Sidebar/Topic/hooks/useTopicNavigation.ts',
-  'src/app/[variants]/(main)/group/_layout/Sidebar/Topic/hooks/useThreadNavigation.ts',
-  'src/app/[variants]/(main)/chat/_layout/Sidebar/Header/Nav.tsx',
-  'src/app/[variants]/(main)/chat/_layout/Sidebar/Topic/hooks/useTopicNavigation.ts',
-  'src/app/[variants]/(main)/chat/_layout/Sidebar/Topic/hooks/useThreadNavigation.ts',
-  'src/app/[variants]/(main)/memory/_layout/Sidebar/Header/Nav.tsx',
+  'src/routes/(main)/community/_layout/Sidebar/Header/Nav.tsx',
+  'src/routes/(main)/group/_layout/Sidebar/Header/Nav.tsx',
+  'src/routes/(main)/group/_layout/Sidebar/Topic/hooks/useTopicNavigation.ts',
+  'src/routes/(main)/group/_layout/Sidebar/Topic/hooks/useThreadNavigation.ts',
+  'src/routes/(main)/chat/_layout/Sidebar/Header/Nav.tsx',
+  'src/routes/(main)/chat/_layout/Sidebar/Topic/hooks/useTopicNavigation.ts',
+  'src/routes/(main)/chat/_layout/Sidebar/Topic/hooks/useThreadNavigation.ts',
+  'src/routes/(main)/memory/_layout/Sidebar/Header/Nav.tsx',
 ];
 
 interface MigrationResult {
@@ -64,21 +64,21 @@ async function migrateFile(relativePath: string): Promise<MigrationResult | null
   for (const hook of importedHooks) {
     switch (hook) {
       case 'usePathname': {
-        newImports.push(`import { usePathname } from '@/app/[variants]/(main)/hooks/usePathname';`);
+        newImports.push(`import { usePathname } from '@/routes/(main)/hooks/usePathname';`);
         changes.push('usePathname -> React Router version');
 
         break;
       }
       case 'useSearchParams': {
         newImports.push(
-          `import { useSearchParams } from '@/app/[variants]/(main)/hooks/useSearchParams';`,
+          `import { useSearchParams } from '@/routes/(main)/hooks/useSearchParams';`,
         );
         changes.push('useSearchParams -> React Router version');
 
         break;
       }
       case 'useRouter': {
-        newImports.push(`import { useRouter } from '@/app/[variants]/(main)/hooks/useRouter';`);
+        newImports.push(`import { useRouter } from '@/routes/(main)/hooks/useRouter';`);
         changes.push('useRouter -> React Router version');
 
         break;

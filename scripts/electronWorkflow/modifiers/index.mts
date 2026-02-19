@@ -31,9 +31,9 @@ export const modifySourceForElectron = async (TEMP_DIR: string) => {
 if (isDirectRun(import.meta.url)) {
   await runStandalone('modifySourceForElectron', modifySourceForElectron, [
     { lang: Lang.TypeScript, path: path.join(process.cwd(), 'next.config.ts') },
-    { lang: Lang.Tsx, path: 'src/app/[variants]/page.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/page.tsx' },
     { lang: Lang.Tsx, path: 'src/layout/GlobalProvider/index.tsx' },
-    { lang: Lang.Tsx, path: 'src/app/[variants]/router/desktopRouter.config.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/router/desktopRouter.config.tsx' },
     { lang: Lang.Tsx, path: 'src/components/mdx/Image.tsx' },
     { lang: Lang.TypeScript, path: 'src/features/DevPanel/CacheViewer/getCacheEntries.ts' },
     { lang: Lang.TypeScript, path: 'src/server/translation.ts' },

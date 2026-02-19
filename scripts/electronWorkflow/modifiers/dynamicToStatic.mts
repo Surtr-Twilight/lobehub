@@ -213,7 +213,7 @@ const removeDynamicElementImport = (code: string): string => {
 export const convertDynamicToStatic = async (TEMP_DIR: string) => {
   const routerConfigPath = path.join(
     TEMP_DIR,
-    'src/app/[variants]/router/desktopRouter.config.tsx',
+    'src/routes/router/desktopRouter.config.tsx',
   );
 
   console.log('  Processing dynamicElement → static imports...');
@@ -268,6 +268,6 @@ export const convertDynamicToStatic = async (TEMP_DIR: string) => {
 
 if (isDirectRun(import.meta.url)) {
   await runStandalone('convertDynamicToStatic', convertDynamicToStatic, [
-    { lang: Lang.Tsx, path: 'src/app/[variants]/router/desktopRouter.config.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/router/desktopRouter.config.tsx' },
   ]);
 }

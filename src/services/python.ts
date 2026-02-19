@@ -8,9 +8,10 @@ class PythonService {
     files: File[],
   ): Promise<CodeInterpreterResponse | undefined> {
     if (typeof Worker === 'undefined') return;
+    const clientEnv = window.__SERVER_CONFIG__?.clientEnv;
     const interpreter = await new PythonInterpreter!({
-      pyodideIndexUrl: process.env.NEXT_PUBLIC_PYODIDE_INDEX_URL!,
-      pypiIndexUrl: process.env.NEXT_PUBLIC_PYPI_INDEX_URL!,
+      pyodideIndexUrl: clientEnv?.pyodideIndexUrl!,
+      pypiIndexUrl: clientEnv?.pyodidePipIndexUrl!,
     });
     await interpreter.init();
     await interpreter.installPackages(packages.filter((p) => p !== ''));

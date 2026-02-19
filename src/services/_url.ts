@@ -1,33 +1,30 @@
-import { withElectronProtocolIfElectron } from '@/const/protocol';
-
-/* eslint-disable sort-keys-fix/sort-keys-fix */
+import { morphApiURI } from '@/const/protocol';
 
 export const API_ENDPOINTS = {
-  oauth: withElectronProtocolIfElectron('/api/auth'),
+  oauth: morphApiURI('/api/auth'),
 
-  proxy: withElectronProtocolIfElectron('/webapi/proxy'),
+  proxy: morphApiURI('/webapi/proxy'),
 
   // plugins
-  gateway: withElectronProtocolIfElectron('/webapi/plugin/gateway'),
+  gateway: morphApiURI('/webapi/plugin/gateway'),
 
   // trace
-  trace: withElectronProtocolIfElectron('/webapi/trace'),
+  trace: morphApiURI('/webapi/trace'),
 
   // chat
-  chat: (provider: string) => withElectronProtocolIfElectron(`/webapi/chat/${provider}`),
+  chat: (provider: string) => morphApiURI(`/webapi/chat/${provider}`),
 
   // models
-  models: (provider: string) => withElectronProtocolIfElectron(`/webapi/models/${provider}`),
-  modelPull: (provider: string) =>
-    withElectronProtocolIfElectron(`/webapi/models/${provider}/pull`),
+  models: (provider: string) => morphApiURI(`/webapi/models/${provider}`),
+  modelPull: (provider: string) => morphApiURI(`/webapi/models/${provider}/pull`),
 
   // STT
-  stt: withElectronProtocolIfElectron('/webapi/stt/openai'),
+  stt: morphApiURI('/webapi/stt/openai'),
 
   // TTS
-  tts: (provider: string) => withElectronProtocolIfElectron(`/webapi/tts/${provider}`),
-  edge: withElectronProtocolIfElectron('/webapi/tts/edge'),
-  microsoft: withElectronProtocolIfElectron('/webapi/tts/microsoft'),
+  tts: (provider: string) => morphApiURI(`/webapi/tts/${provider}`),
+  edge: morphApiURI('/webapi/tts/edge'),
+  microsoft: morphApiURI('/webapi/tts/microsoft'),
 };
 
 export const MARKET_OIDC_ENDPOINTS = {
@@ -35,70 +32,60 @@ export const MARKET_OIDC_ENDPOINTS = {
   // so it must always be an HTTP(S) path joined with `NEXT_PUBLIC_MARKET_BASE_URL`.
   // It MUST NOT be wrapped by the Electron backend protocol.
   auth: '/lobehub-oidc/auth',
-  token: withElectronProtocolIfElectron('/market/oidc/token'),
-  userinfo: withElectronProtocolIfElectron('/market/oidc/userinfo'),
-  handoff: withElectronProtocolIfElectron('/market/oidc/handoff'),
+  token: morphApiURI('/market/oidc/token'),
+  userinfo: morphApiURI('/market/oidc/userinfo'),
+  handoff: morphApiURI('/market/oidc/handoff'),
   // Same as `auth`: used as `redirect_uri` (must be a real web URL under market base).
   desktopCallback: '/lobehub-oidc/callback/desktop',
 };
 
 export const MARKET_ENDPOINTS = {
-  base: withElectronProtocolIfElectron('/market'),
+  base: morphApiURI('/market'),
   // Agent management
-  createAgent: withElectronProtocolIfElectron('/market/agent/create'),
+  createAgent: morphApiURI('/market/agent/create'),
   getAgentDetail: (identifier: string) =>
-    withElectronProtocolIfElectron(`/market/agent/${encodeURIComponent(identifier)}`),
-  getOwnAgents: withElectronProtocolIfElectron('/market/agent/own'),
-  createAgentVersion: withElectronProtocolIfElectron('/market/agent/versions/create'),
+    morphApiURI(`/market/agent/${encodeURIComponent(identifier)}`),
+  getOwnAgents: morphApiURI('/market/agent/own'),
+  createAgentVersion: morphApiURI('/market/agent/versions/create'),
   // Agent status management
   publishAgent: (identifier: string) =>
-    withElectronProtocolIfElectron(`/market/agent/${encodeURIComponent(identifier)}/publish`),
+    morphApiURI(`/market/agent/${encodeURIComponent(identifier)}/publish`),
   unpublishAgent: (identifier: string) =>
-    withElectronProtocolIfElectron(`/market/agent/${encodeURIComponent(identifier)}/unpublish`),
+    morphApiURI(`/market/agent/${encodeURIComponent(identifier)}/unpublish`),
   deprecateAgent: (identifier: string) =>
-    withElectronProtocolIfElectron(`/market/agent/${encodeURIComponent(identifier)}/deprecate`),
+    morphApiURI(`/market/agent/${encodeURIComponent(identifier)}/deprecate`),
   // User profile
-  getUserProfile: (username: string) =>
-    withElectronProtocolIfElectron(`/market/user/${encodeURIComponent(username)}`),
-  updateUserProfile: withElectronProtocolIfElectron('/market/user/me'),
+  getUserProfile: (username: string) => morphApiURI(`/market/user/${encodeURIComponent(username)}`),
+  updateUserProfile: morphApiURI('/market/user/me'),
 
   // Social - Follow
-  follow: withElectronProtocolIfElectron('/market/social/follow'),
-  unfollow: withElectronProtocolIfElectron('/market/social/unfollow'),
-  followStatus: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/follow-status/${userId}`),
-  following: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/following/${userId}`),
-  followers: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/followers/${userId}`),
-  followCounts: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/follow-counts/${userId}`),
+  follow: morphApiURI('/market/social/follow'),
+  unfollow: morphApiURI('/market/social/unfollow'),
+  followStatus: (userId: number) => morphApiURI(`/market/social/follow-status/${userId}`),
+  following: (userId: number) => morphApiURI(`/market/social/following/${userId}`),
+  followers: (userId: number) => morphApiURI(`/market/social/followers/${userId}`),
+  followCounts: (userId: number) => morphApiURI(`/market/social/follow-counts/${userId}`),
 
   // Social - Favorite
-  favorite: withElectronProtocolIfElectron('/market/social/favorite'),
-  unfavorite: withElectronProtocolIfElectron('/market/social/unfavorite'),
+  favorite: morphApiURI('/market/social/favorite'),
+  unfavorite: morphApiURI('/market/social/unfavorite'),
   favoriteStatus: (targetType: 'agent' | 'plugin', targetIdOrIdentifier: number | string) =>
-    withElectronProtocolIfElectron(
+    morphApiURI(
       `/market/social/favorite-status/${targetType}/${encodeURIComponent(targetIdOrIdentifier)}`,
     ),
-  myFavorites: withElectronProtocolIfElectron('/market/social/favorites'),
-  userFavorites: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/user-favorites/${userId}`),
-  favoriteAgents: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/favorite-agents/${userId}`),
-  favoritePlugins: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/favorite-plugins/${userId}`),
+  myFavorites: morphApiURI('/market/social/favorites'),
+  userFavorites: (userId: number) => morphApiURI(`/market/social/user-favorites/${userId}`),
+  favoriteAgents: (userId: number) => morphApiURI(`/market/social/favorite-agents/${userId}`),
+  favoritePlugins: (userId: number) => morphApiURI(`/market/social/favorite-plugins/${userId}`),
 
   // Social - Like
-  like: withElectronProtocolIfElectron('/market/social/like'),
-  unlike: withElectronProtocolIfElectron('/market/social/unlike'),
-  toggleLike: withElectronProtocolIfElectron('/market/social/toggle-like'),
+  like: morphApiURI('/market/social/like'),
+  unlike: morphApiURI('/market/social/unlike'),
+  toggleLike: morphApiURI('/market/social/toggle-like'),
   likeStatus: (targetType: 'agent' | 'plugin', targetIdOrIdentifier: number | string) =>
-    withElectronProtocolIfElectron(
+    morphApiURI(
       `/market/social/like-status/${targetType}/${encodeURIComponent(targetIdOrIdentifier)}`,
     ),
-  likedAgents: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/liked-agents/${userId}`),
-  likedPlugins: (userId: number) =>
-    withElectronProtocolIfElectron(`/market/social/liked-plugins/${userId}`),
+  likedAgents: (userId: number) => morphApiURI(`/market/social/liked-agents/${userId}`),
+  likedPlugins: (userId: number) => morphApiURI(`/market/social/liked-plugins/${userId}`),
 };

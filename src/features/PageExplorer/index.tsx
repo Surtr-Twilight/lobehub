@@ -12,7 +12,7 @@ interface PageExplorerProps {
 /**
  * Dedicated for the /page route
  *
- * Work together with a sidebar src/app/[variants]/(main)/page/_layout/Body/index.tsx
+ * Work together with a sidebar src/routes/(main)/page/_layout/Body/index.tsx
  */
 const PageExplorer = memo<PageExplorerProps>(({ pageId }) => {
   const updatePageOptimistically = usePageStore((s) => s.updatePageOptimistically);

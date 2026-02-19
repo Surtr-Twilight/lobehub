@@ -76,6 +76,7 @@ COPY patches ./patches
 # bring in desktop workspace manifest so pnpm can resolve it
 COPY apps/desktop/src/main/package.json ./apps/desktop/src/main/package.json
 
+
 RUN set -e && \
     if [ "${USE_CN_MIRROR:-false}" = "true" ]; then \
         export SENTRYCLI_CDNURL="https://npmmirror.com/mirrors/sentry-cli"; \
@@ -116,6 +117,8 @@ COPY --from=base /distroless/ /
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/.next/standalone /app/
+# Copy SPA build output (Vite)
+COPY --from=builder /app/public/spa /app/public/spa
 # Copy Next export output for desktop renderer
 COPY --from=builder /app/apps/desktop/dist/next /app/apps/desktop/dist/next
 

@@ -1,5 +1,5 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix , typescript-sort-keys/interface */
-import { createEnv } from '@t3-oss/env-nextjs';
+import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
 
 declare global {
@@ -107,6 +107,7 @@ declare global {
 
 export const getAuthConfig = () => {
   return createEnv({
+    clientPrefix: 'NEXT_PUBLIC_',
     client: {},
     server: {
       AUTH_SECRET: z.string().optional(),
@@ -295,8 +296,9 @@ export const getAuthConfig = () => {
 
 export const authEnv = getAuthConfig();
 
-// Auth headers and constants
-export const LOBE_CHAT_AUTH_HEADER = 'X-lobe-chat-auth';
-export const LOBE_CHAT_OIDC_AUTH_HEADER = 'Oidc-Auth';
-export const OAUTH_AUTHORIZED = 'X-oauth-authorized';
-export const SECRET_XOR_KEY = 'LobeHub · LobeHub';
+export {
+  LOBE_CHAT_AUTH_HEADER,
+  LOBE_CHAT_OIDC_AUTH_HEADER,
+  OAUTH_AUTHORIZED,
+  SECRET_XOR_KEY,
+} from '@/const/auth';

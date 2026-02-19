@@ -4,7 +4,7 @@ import { KLAVIS_SERVER_TYPES, LOBEHUB_SKILL_PROVIDERS } from '@lobechat/const';
 import type { BuiltinInterventionProps } from '@lobechat/types';
 import { Avatar, Flexbox } from '@lobehub/ui';
 import { CheckCircle } from 'lucide-react';
-import Image from 'next/image';
+
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -101,8 +101,7 @@ const InstallPluginIntervention = memo<BuiltinInterventionProps<InstallPluginPar
         >
           <Flexbox horizontal align="center" gap={12}>
             {icon ? (
-              <Image
-                unoptimized
+              <img
                 alt={klavisTypeInfo?.label || identifier}
                 height={40}
                 src={icon}
@@ -144,8 +143,7 @@ const InstallPluginIntervention = memo<BuiltinInterventionProps<InstallPluginPar
         >
           <Flexbox horizontal align="center" gap={12}>
             {icon ? (
-              <Image
-                unoptimized
+              <img
                 alt={lobehubSkillProviderInfo?.label || identifier}
                 height={40}
                 src={icon}
@@ -188,8 +186,7 @@ const InstallPluginIntervention = memo<BuiltinInterventionProps<InstallPluginPar
       >
         <Flexbox horizontal align="center" gap={12}>
           {pluginIcon && typeof pluginIcon === 'string' && pluginIcon.startsWith('http') ? (
-            <Image
-              unoptimized
+            <img
               alt={pluginName}
               height={40}
               src={pluginIcon}

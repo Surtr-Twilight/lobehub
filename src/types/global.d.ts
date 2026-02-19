@@ -1,4 +1,5 @@
 import 'antd-style';
+import 'vite/client';
 
 import { type LobeCustomStylish, type LobeCustomToken } from '@lobehub/ui';
 import { type AntdToken } from 'antd-style/lib/types/theme';

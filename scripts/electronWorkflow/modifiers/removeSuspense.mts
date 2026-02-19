@@ -95,7 +95,7 @@ const removeUnusedImports = (code: string): string => {
 export const removeSuspenseFromConversation = async (TEMP_DIR: string) => {
   const filePath = path.join(
     TEMP_DIR,
-    'src/app/[variants]/(main)/agent/features/Conversation/index.tsx',
+    'src/routes/(main)/agent/features/Conversation/index.tsx',
   );
 
   console.log('  Removing Suspense from Conversation/index.tsx...');
@@ -123,6 +123,6 @@ export const removeSuspenseFromConversation = async (TEMP_DIR: string) => {
 
 if (isDirectRun(import.meta.url)) {
   await runStandalone('removeSuspenseFromConversation', removeSuspenseFromConversation, [
-    { lang: Lang.Tsx, path: 'src/app/[variants]/(main)/agent/features/Conversation/index.tsx' },
+    { lang: Lang.Tsx, path: 'src/routes/(main)/agent/features/Conversation/index.tsx' },
   ]);
 }

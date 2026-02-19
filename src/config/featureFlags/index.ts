@@ -1,5 +1,5 @@
 import { EdgeConfig } from '@lobechat/edge-config';
-import { createEnv } from '@t3-oss/env-nextjs';
+import { createEnv } from '@t3-oss/env-core';
 import debug from 'debug';
 import { z } from 'zod';
 

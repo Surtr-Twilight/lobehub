@@ -1,8 +1,6 @@
 import debug from 'debug';
 import { type NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { UAParser } from 'ua-parser-js';
-import urlJoin from 'url-join';
 
 import { auth } from '@/auth';
 import { LOBE_LOCALE_COOKIE } from '@/const/locale';
@@ -10,8 +8,6 @@ import { isDesktop } from '@/const/version';
 import { appEnv } from '@/envs/app';
 import { authEnv } from '@/envs/auth';
 import { type Locales } from '@/locales/resources';
-import { parseBrowserLanguage } from '@/utils/locale';
-import { RouteVariants } from '@/utils/server/routeVariants';
 
 import { createRouteMatcher } from './createRouteMatcher';
 
@@ -21,6 +17,17 @@ const logBetterAuth = debug('middleware:better-auth');
 
 export function defineConfig() {
   const backendApiEndpoints = ['/api', '/trpc', '/webapi', '/oidc'];
+
+  // Auth routes are served by Next.js directly (SSR pages)
+  const authRoutes = [
+    '/signin',
+    '/signup',
+    '/auth-error',
+    '/reset-password',
+    '/verify-email',
+    '/oauth',
+    '/market-auth-callback',
+  ];
 
   const defaultMiddleware = (request: NextRequest) => {
     const url = new URL(request.url);
@@ -32,43 +39,35 @@ export function defineConfig() {
       return NextResponse.next();
     }
 
-    // locale has three levels
-    // 1. search params
-    // 2. cookie
-    // 3. browser
-
     // highest priority is explicitly in search params, like ?hl=zh-CN
     const explicitlyLocale = (url.searchParams.get('hl') || undefined) as Locales | undefined;
 
-    // if it's a new user, there's no cookie, So we need to use the fallback language parsed by accept-language
-    const browserLanguage = parseBrowserLanguage(request.headers);
+    // Helper to persist locale cookie on explicit ?hl= param
+    const maybeSetLocaleCookie = (response: NextResponse) => {
+      if (explicitlyLocale) {
+        const existingLocale = request.cookies.get(LOBE_LOCALE_COOKIE)?.value as
+          | Locales
+          | undefined;
+        if (!existingLocale) {
+          response.cookies.set(LOBE_LOCALE_COOKIE, explicitlyLocale, {
+            maxAge: 60 * 60 * 24 * 90,
+            path: '/',
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+          });
+          logDefault('Persisted explicit locale to cookie (no prior cookie): %s', explicitlyLocale);
+        }
+      }
+      return response;
+    };
 
-    const locale =
-      explicitlyLocale ||
-      ((request.cookies.get(LOBE_LOCALE_COOKIE)?.value || browserLanguage) as Locales);
+    // Auth routes → pass through to Next.js (SSR)
+    if (authRoutes.some((r) => url.pathname.startsWith(r))) {
+      logDefault('Auth route, passing through to Next.js: %s', url.pathname);
+      return maybeSetLocaleCookie(NextResponse.next());
+    }
 
-    const ua = request.headers.get('user-agent');
-
-    const device = new UAParser(ua || '').getDevice();
-
-    logDefault('User preferences: %O', {
-      browserLanguage,
-      deviceType: device.type,
-      hasCookies: {
-        locale: !!request.cookies.get(LOBE_LOCALE_COOKIE)?.value,
-      },
-      locale,
-    });
-
-    // 2. Create normalized preference values
-    const route = RouteVariants.serializeVariants({
-      isMobile: device.type === 'mobile',
-      locale,
-    });
-
-    logDefault('Serialized route variant: %s', route);
-
-    // if app is in docker, rewrite to self container
+    // Docker local rewrite: rewrite to self container
     // https://github.com/lobehub/lobe-chat/issues/5876
     if (appEnv.MIDDLEWARE_REWRITE_THROUGH_LOCAL) {
       logDefault('Local container rewrite enabled: %O', {
@@ -81,80 +80,15 @@ export function defineConfig() {
       url.protocol = 'http';
       url.host = '127.0.0.1';
       url.port = process.env.PORT || '3210';
+
+      logDefault('nextURL after rewrite: %s', url.toString());
+      const rewrite = NextResponse.rewrite(url, { status: 200 });
+      return maybeSetLocaleCookie(rewrite);
     }
 
-    // refs: https://github.com/lobehub/lobe-chat/pull/5866
-    // new handle segment rewrite: /${route}${originalPathname}
-    // / -> /zh-CN__0
-    // /discover -> /zh-CN__0/discover
-    // All SPA routes that use react-router-dom should be rewritten to just /${route}
-    const spaRoutes = [
-      '/chat',
-      '/agent',
-      '/group',
-      '/community',
-      '/resource',
-      '/page',
-      '/settings',
-      '/image',
-      '/labs',
-      '/changelog',
-      '/profile',
-      '/me',
-      '/desktop-onboarding',
-      '/onboarding',
-      '/share',
-    ];
-    const isSpaRoute = spaRoutes.some((route) => url.pathname.startsWith(route));
-
-    let nextPathname: string;
-    if (isSpaRoute) {
-      nextPathname = `/${route}`;
-    } else {
-      nextPathname = `/${route}` + (url.pathname === '/' ? '' : url.pathname);
-    }
-    const nextURL = appEnv.MIDDLEWARE_REWRITE_THROUGH_LOCAL
-      ? urlJoin(url.origin, nextPathname)
-      : nextPathname;
-
-    console.log(`[rewrite] ${url.pathname} -> ${nextURL}`);
-
-    logDefault('URL rewrite: %O', {
-      isLocalRewrite: appEnv.MIDDLEWARE_REWRITE_THROUGH_LOCAL,
-      nextPathname: nextPathname,
-      nextURL: nextURL,
-      originalPathname: url.pathname,
-    });
-
-    url.pathname = nextPathname;
-
-    logDefault('nextURL after rewrite: %s', url.toString());
-    // build rewrite response first
-    const rewrite = NextResponse.rewrite(url, { status: 200 });
-
-    // If locale explicitly provided via query (?hl=), persist it in cookie when user has no prior preference
-    if (explicitlyLocale) {
-      const existingLocale = request.cookies.get(LOBE_LOCALE_COOKIE)?.value as Locales | undefined;
-      if (!existingLocale) {
-        rewrite.cookies.set(LOBE_LOCALE_COOKIE, explicitlyLocale, {
-          // 90 days is a balanced persistence for locale preference
-          maxAge: 60 * 60 * 24 * 90,
-
-          path: '/',
-          sameSite: 'lax',
-          secure: process.env.NODE_ENV === 'production',
-        });
-        logDefault('Persisted explicit locale to cookie (no prior cookie): %s', explicitlyLocale);
-      } else {
-        logDefault(
-          'Locale cookie exists (%s), skip overwrite with %s',
-          existingLocale,
-          explicitlyLocale,
-        );
-      }
-    }
-
-    return rewrite;
+    // All other routes (SPA and misc) pass through to Next.js
+    // The root [[...path]] catch-all route handler serves the Vite-built SPA HTML
+    return maybeSetLocaleCookie(NextResponse.next());
   };
 
   const isPublicRoute = createRouteMatcher([
@@ -184,7 +118,6 @@ export function defineConfig() {
     '/market-auth-callback',
     // public share pages
     '/share(.*)',
- 
   ]);
 
   const betterAuthMiddleware = async (req: NextRequest) => {
@@ -195,7 +128,11 @@ export function defineConfig() {
     // when enable auth protection, only public route is not protected, others are all protected
     const isProtected = !isPublicRoute(req);
 
-    logBetterAuth('Route protection status: %s, %s', req.url, isProtected ? 'protected' : 'public');
+    logBetterAuth(
+      'Route protection status: %s, %s',
+      req.url,
+      isProtected ? 'protected' : 'public',
+    );
 
     // Skip session lookup for public routes to reduce latency
     if (!isProtected) return response;
