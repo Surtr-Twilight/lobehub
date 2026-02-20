@@ -9,12 +9,13 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 const isDesktopBuild = process.env.IS_DESKTOP_BUILD === '1';
 const isAnalyze = process.env.ANALYZE === 'true';
 
+const isDev = process.env.NODE_ENV === 'development';
 export default defineConfig({
   build: {
     emptyOutDir: true,
     outDir: 'public/spa',
   },
-  base: '/spa/',
+  base: isDev ? '/' : '/spa/',
   define: {
     'process.env.NEXT_PUBLIC_IS_DESKTOP_APP': JSON.stringify('0'),
     '__DEV__': JSON.stringify(process.env.NODE_ENV === 'development'),
