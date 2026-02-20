@@ -4,7 +4,7 @@ import { analyzer } from 'vite-bundle-analyzer';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-import { createDependencyChunksPlugin } from './plugins/vite/createDependencyChunksPlugin';
+// import { createDependencyChunksPlugin } from './plugins/vite/createDependencyChunksPlugin';
 
 const isDesktopBuild = process.env.IS_DESKTOP_BUILD === '1';
 const isAnalyze = process.env.ANALYZE === 'true';
@@ -14,6 +14,7 @@ export default defineConfig({
     emptyOutDir: true,
     outDir: 'public/spa',
   },
+  base: '/spa/',
   define: {
     'process.env.NEXT_PUBLIC_IS_DESKTOP_APP': JSON.stringify('0'),
     '__DEV__': JSON.stringify(process.env.NODE_ENV === 'development'),
@@ -44,22 +45,7 @@ export default defineConfig({
       },
       jsxImportSource: '@emotion/react',
     }),
-    createDependencyChunksPlugin([
-      ['react', 'react-dom', 'scheduler'],
-      ['react-router', 'react-router-dom'],
-      [
-        'antd',
-        '@ant-design/icons',
-        '@ant-design/pro-components',
-        '@lobehub/ui',
-        'antd-style',
-        '@emotion/react',
-        '@emotion/styled',
-      ],
-      ['zustand', '@tanstack/react-query', 'swr'],
-      ['react-i18next', 'i18next'],
-      ['lodash', 'lodash-es', 'dayjs'],
-    ]),
+
     ...(isAnalyze
       ? [
           analyzer({
