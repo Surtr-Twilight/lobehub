@@ -44,5 +44,4 @@ declare global {
 
   const __DEV__: boolean;
   const __DESKTOP_BUILD__: boolean;
-  const __MOBILE_BUILD__: boolean;
 }

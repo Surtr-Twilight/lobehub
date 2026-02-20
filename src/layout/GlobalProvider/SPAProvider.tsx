@@ -34,7 +34,7 @@ interface SPAGlobalProviderProps {
 const locale = getCookie(LOBE_LOCALE_COOKIE);
 const SPAGlobalProvider = ({ children }: SPAGlobalProviderProps) => {
   const serverConfig = window.__SERVER_CONFIG__ || {};
-  const { featureFlags, config, theme } = serverConfig;
+  const { featureFlags, config, theme, isMobile } = serverConfig;
 
   const [antdLocale, setAntdLocale] = useState<any>(undefined);
 
@@ -55,7 +55,7 @@ const SPAGlobalProvider = ({ children }: SPAGlobalProviderProps) => {
           >
             <ServerConfigStoreProvider
               featureFlags={featureFlags}
-              isMobile={__MOBILE_BUILD__}
+              isMobile={isMobile}
               serverConfig={config}
             >
               <QueryProvider>

@@ -1,32 +1,34 @@
-import path from 'node:path';
-
 import react from '@vitejs/plugin-react';
-import { codeInspectorPlugin } from 'code-inspector-plugin';
 import { defineConfig } from 'vite';
+import { analyzer } from 'vite-bundle-analyzer';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
+import { createDependencyChunksPlugin } from './plugins/vite/createDependencyChunksPlugin';
+
 const isDesktopBuild = process.env.IS_DESKTOP_BUILD === '1';
-const isMobileBuild = process.env.IS_MOBILE_BUILD === '1';
-const isDev = process.env.NODE_ENV === 'development';
+const isAnalyze = process.env.ANALYZE === 'true';
 
 export default defineConfig({
   build: {
     emptyOutDir: true,
     outDir: 'public/spa',
-    rollupOptions: {
-      input: {
-        desktop: path.resolve(__dirname, 'index.html'),
-        mobile: path.resolve(__dirname, 'index.mobile.html'),
-      },
-    },
   },
   define: {
     'process.env.NEXT_PUBLIC_IS_DESKTOP_APP': JSON.stringify('0'),
     '__DEV__': JSON.stringify(process.env.NODE_ENV === 'development'),
     '__DESKTOP_BUILD__': JSON.stringify(isDesktopBuild),
-    '__MOBILE_BUILD__': JSON.stringify(isMobileBuild),
   },
   plugins: [
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      include: ['crypto', 'http', 'https', 'path', 'stream', 'url', 'util', 'zlib'],
+      protocolImports: true,
+    }),
     tsconfigPaths(),
     // ...(isDev
     //   ? [
@@ -42,6 +44,30 @@ export default defineConfig({
       },
       jsxImportSource: '@emotion/react',
     }),
+    createDependencyChunksPlugin([
+      ['react', 'react-dom', 'scheduler'],
+      ['react-router', 'react-router-dom'],
+      [
+        'antd',
+        '@ant-design/icons',
+        '@ant-design/pro-components',
+        '@lobehub/ui',
+        'antd-style',
+        '@emotion/react',
+        '@emotion/styled',
+      ],
+      ['zustand', '@tanstack/react-query', 'swr'],
+      ['react-i18next', 'i18next'],
+      ['lodash', 'lodash-es', 'dayjs'],
+    ]),
+    ...(isAnalyze
+      ? [
+          analyzer({
+            analyzerMode: 'server',
+            openAnalyzer: true,
+          }),
+        ]
+      : []),
   ],
   server: {
     cors: true,

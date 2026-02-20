@@ -1,6 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-
 import { type NextRequest } from 'next/server';
 import { isRtlLang } from 'rtl-detect';
 
@@ -12,14 +9,18 @@ import { fileEnv } from '@/envs/file';
 import { pythonEnv } from '@/envs/python';
 import { getServerGlobalConfig } from '@/server/globalConfig';
 import { serializeForHtml } from '@/server/utils/serializeForHtml';
-import { type AnalyticsConfig, type SPAClientEnv, type SPAServerConfig, type SPAThemeConfig } from '@/types/spaServerConfig';
+import {
+  type AnalyticsConfig,
+  type SPAClientEnv,
+  type SPAServerConfig,
+  type SPAThemeConfig,
+} from '@/types/spaServerConfig';
 import { parseBrowserLanguage } from '@/utils/locale';
+
+import { desktopHtmlTemplate, mobileHtmlTemplate } from './spaHtmlTemplates';
 
 const isDev = process.env.NODE_ENV === 'development';
 const VITE_DEV_ORIGIN = process.env.VITE_DEV_ORIGIN || 'http://localhost:3011';
-
-let desktopHtml: string | null = null;
-let mobileHtml: string | null = null;
 
 async function rewriteViteAssetUrls(html: string): Promise<string> {
   const { parseHTML } = await import('linkedom');
@@ -43,7 +44,7 @@ async function rewriteViteAssetUrls(html: string): Promise<string> {
   document.querySelectorAll('script[type="module"]:not([src])').forEach((el) => {
     const text = el.textContent || '';
     if (text.includes('/@')) {
-      el.textContent = text.replace(
+      el.textContent = text.replaceAll(
         /from\s+["'](\/[@\w].*?)["']/g,
         (_match, p) => `from "${VITE_DEV_ORIGIN}${p}"`,
       );
@@ -72,28 +73,15 @@ globalThis.Worker.prototype=O.prototype;
 
 async function getTemplate(isMobile: boolean): Promise<string> {
   if (isDev) {
-    const url = isMobile ? `${VITE_DEV_ORIGIN}/index.mobile.html` : VITE_DEV_ORIGIN;
-    const res = await fetch(url);
+    const res = await fetch(VITE_DEV_ORIGIN);
     const html = await res.text();
     return await rewriteViteAssetUrls(html);
   }
 
   if (isMobile) {
-    if (!mobileHtml) {
-      mobileHtml = readFileSync(
-        resolve(process.cwd(), 'public/spa/index.mobile.html'),
-        'utf-8',
-      );
-    }
-    return mobileHtml;
+    return mobileHtmlTemplate;
   }
-  if (!desktopHtml) {
-    desktopHtml = readFileSync(
-      resolve(process.cwd(), 'public/spa/index.html'),
-      'utf-8',
-    );
-  }
-  return desktopHtml;
+  return desktopHtmlTemplate;
 }
 
 function buildAnalyticsConfig(): AnalyticsConfig {
