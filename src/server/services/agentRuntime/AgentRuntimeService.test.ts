@@ -64,36 +64,33 @@ vi.mock('@/server/services/pluginGateway', () => ({
   })),
 }));
 
-// Mock dependencies
-vi.mock('@/server/modules/AgentRuntime', () => ({
-  AgentRuntimeCoordinator: vi.fn().mockImplementation(() => ({
-    createAgentOperation: vi.fn(),
-    deleteAgentOperation: vi.fn(),
-    disconnect: vi.fn(),
-    getActiveOperations: vi.fn(),
-    getExecutionHistory: vi.fn(),
-    getOperationMetadata: vi.fn(),
-    loadAgentState: vi.fn(),
-    releaseStepLock: vi.fn().mockResolvedValue(undefined),
-    saveAgentState: vi.fn(),
-    saveStepResult: vi.fn(),
-    tryClaimStep: vi.fn().mockResolvedValue(true),
-  })),
-  createStreamEventManager: vi.fn().mockReturnValue({
-    getStreamHistory: vi.fn().mockResolvedValue([]),
-    publishStreamEvent: vi.fn().mockResolvedValue(undefined),
-    subscribe: vi.fn().mockReturnValue(() => {}),
-  }),
-  createStreamingFinishExecutor: vi.fn(),
-  createStreamingHumanApprovalExecutor: vi.fn(),
-  createStreamingLLMExecutor: vi.fn(),
-  createStreamingToolExecutor: vi.fn(),
-  DurableLobeChatAgent: vi.fn(),
-  StreamEventManager: vi.fn().mockImplementation(() => ({
-    getStreamHistory: vi.fn(),
-    publishStreamEvent: vi.fn(),
-  })),
+// Mock factory and redis dependencies to break env import chains,
+// so the barrel can be imported with real AgentRuntimeCoordinator + InMemory backends
+vi.mock('@/server/modules/AgentRuntime/factory', async () => {
+  const { InMemoryAgentStateManager } =
+    await import('@/server/modules/AgentRuntime/InMemoryAgentStateManager');
+  const { InMemoryStreamEventManager } =
+    await import('@/server/modules/AgentRuntime/InMemoryStreamEventManager');
+  return {
+    createAgentStateManager: () => new InMemoryAgentStateManager(),
+    createStreamEventManager: () => new InMemoryStreamEventManager(),
+    isRedisAvailable: () => false,
+  };
+});
+
+vi.mock('@/server/modules/AgentRuntime/redis', () => ({
+  createAgentRuntimeRedisClient: vi.fn().mockReturnValue(null),
+  getAgentRuntimeRedisClient: vi.fn().mockReturnValue(null),
 }));
+
+// Use real AgentRuntimeCoordinator with InMemory backends; only mock unrelated exports
+vi.mock('@/server/modules/AgentRuntime', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    createRuntimeExecutors: vi.fn(),
+  };
+});
 
 vi.mock('@lobechat/agent-runtime', () => ({
   AgentRuntime: vi.fn().mockImplementation((agent, options) => ({
@@ -162,10 +159,23 @@ describe('AgentRuntimeService', () => {
 
     service = new AgentRuntimeService(mockDb, mockUserId);
 
-    // Get mocked instances
+    // Get real instances (backed by InMemory implementations)
     mockCoordinator = (service as any).coordinator;
     mockStreamManager = (service as any).streamManager;
     mockQueueService = (service as any).queueService;
+
+    // Auto-spy all coordinator methods so tests can use .mockResolvedValue() / .toHaveBeenCalledWith()
+    for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(mockCoordinator))) {
+      if (key !== 'constructor' && typeof mockCoordinator[key] === 'function') {
+        vi.spyOn(mockCoordinator, key);
+      }
+    }
+    // Auto-spy all streamManager methods
+    for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(mockStreamManager))) {
+      if (key !== 'constructor' && typeof mockStreamManager[key] === 'function') {
+        vi.spyOn(mockStreamManager, key);
+      }
+    }
   });
 
   afterEach(() => {

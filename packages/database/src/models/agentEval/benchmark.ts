@@ -68,6 +68,7 @@ export class AgentEvalBenchmarkModel {
       })
       .from(agentEvalRuns)
       .innerJoin(agentEvalDatasets, eq(agentEvalRuns.datasetId, agentEvalDatasets.id))
+      .where(eq(agentEvalRuns.userId, this.userId))
       .groupBy(agentEvalDatasets.benchmarkId)
       .as('rc');
 
@@ -92,7 +93,9 @@ export class AgentEvalBenchmarkModel {
           .select()
           .from(agentEvalRuns)
           .innerJoin(agentEvalDatasets, eq(agentEvalRuns.datasetId, agentEvalDatasets.id))
-          .where(eq(agentEvalDatasets.benchmarkId, row.id))
+          .where(
+            and(eq(agentEvalDatasets.benchmarkId, row.id), eq(agentEvalRuns.userId, this.userId)),
+          )
           .orderBy(desc(agentEvalRuns.createdAt))
           .limit(5);
 

@@ -1231,6 +1231,9 @@ export class AgentEvalRunService {
       effectiveRubrics = benchmarkRubrics ?? [];
     }
 
+    // No rubrics to evaluate against — skip evaluation entirely
+    if (effectiveRubrics.length === 0) return;
+
     // Run evaluation
     const result = await evaluate(
       { actual: lastAssistantMsg.content, rubrics: effectiveRubrics, testCase: testCase.content },

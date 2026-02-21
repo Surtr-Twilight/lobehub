@@ -14,6 +14,7 @@ import { AgentEvalBenchmarkModel } from '../benchmark';
 const serverDB = await getTestDB();
 
 const userId = 'benchmark-test-user';
+const userId2 = 'benchmark-test-user-2';
 const benchmarkModel = new AgentEvalBenchmarkModel(serverDB, userId);
 
 beforeEach(async () => {
@@ -23,8 +24,8 @@ beforeEach(async () => {
   await serverDB.delete(agentEvalBenchmarks);
   await serverDB.delete(users);
 
-  // Create test user (needed for runs FK constraint)
-  await serverDB.insert(users).values([{ id: userId }]);
+  // Create test users (needed for runs FK constraint)
+  await serverDB.insert(users).values([{ id: userId }, { id: userId2 }]);
 });
 
 afterEach(async () => {
@@ -271,6 +272,68 @@ describe('AgentEvalBenchmarkModel', () => {
       const result = results.find((r) => r.identifier === 'user-1')!;
 
       expect(result.runCount).toBe(2);
+    });
+
+    it('should only count runs belonging to the current user in runCount', async () => {
+      const benchmarks = await serverDB.query.agentEvalBenchmarks.findMany();
+      const userBenchmark = benchmarks.find((b) => b.identifier === 'user-1')!;
+
+      const [dataset] = await serverDB
+        .insert(agentEvalDatasets)
+        .values({
+          benchmarkId: userBenchmark.id,
+          identifier: 'ds-isolation',
+          name: 'Dataset Isolation',
+          userId,
+        })
+        .returning();
+
+      // Add runs for current user and another user
+      await serverDB.insert(agentEvalRuns).values([
+        { datasetId: dataset.id, userId, status: 'idle' },
+        { datasetId: dataset.id, userId, status: 'completed' },
+        { datasetId: dataset.id, userId: userId2, status: 'idle' },
+        { datasetId: dataset.id, userId: userId2, status: 'completed' },
+        { datasetId: dataset.id, userId: userId2, status: 'running' },
+      ]);
+
+      const results = await benchmarkModel.query(true);
+      const result = results.find((r) => r.identifier === 'user-1')!;
+
+      // Should only count the 2 runs from the current user
+      expect(result.runCount).toBe(2);
+    });
+
+    it('should only return recentRuns belonging to the current user', async () => {
+      const benchmarks = await serverDB.query.agentEvalBenchmarks.findMany();
+      const userBenchmark = benchmarks.find((b) => b.identifier === 'user-1')!;
+
+      const [dataset] = await serverDB
+        .insert(agentEvalDatasets)
+        .values({
+          benchmarkId: userBenchmark.id,
+          identifier: 'ds-recent-isolation',
+          name: 'Dataset Recent Isolation',
+          userId,
+        })
+        .returning();
+
+      // Add runs for both users
+      const [myRun] = await serverDB
+        .insert(agentEvalRuns)
+        .values([
+          { datasetId: dataset.id, userId, status: 'completed', name: 'My Run' },
+          { datasetId: dataset.id, userId: userId2, status: 'completed', name: 'Other Run' },
+        ])
+        .returning();
+
+      const results = await benchmarkModel.query(true);
+      const result = results.find((r) => r.identifier === 'user-1')!;
+
+      // Should only include the current user's runs
+      expect(result.recentRuns).toHaveLength(1);
+      expect(result.recentRuns[0].userId).toBe(userId);
+      expect(result.recentRuns[0].name).toBe('My Run');
     });
 
     it('should return 0 counts for benchmarks without related data', async () => {
