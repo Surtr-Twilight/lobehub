@@ -74,8 +74,10 @@ vi.mock('@/server/modules/AgentRuntime', () => ({
     getExecutionHistory: vi.fn(),
     getOperationMetadata: vi.fn(),
     loadAgentState: vi.fn(),
+    releaseStepLock: vi.fn().mockResolvedValue(undefined),
     saveAgentState: vi.fn(),
     saveStepResult: vi.fn(),
+    tryClaimStep: vi.fn().mockResolvedValue(true),
   })),
   createStreamEventManager: vi.fn().mockReturnValue({
     getStreamHistory: vi.fn().mockResolvedValue([]),
