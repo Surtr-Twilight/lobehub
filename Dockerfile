@@ -111,6 +111,9 @@ RUN set -e && \
 ## Application image, copy all the files for production
 FROM busybox:latest AS app
 
+### [修改 1/4] 注入 cloudflared
+COPY --from=cloudflare/cloudflared:latest /usr/local/bin/cloudflared /app/cloudflared
+
 COPY --from=base /distroless/ /
 
 # Automatically leverage output traces to reduce image size
@@ -133,9 +136,15 @@ COPY --from=builder /deps/node_modules/drizzle-orm /app/node_modules/drizzle-orm
 COPY --from=builder /app/scripts/serverLauncher/startServer.js /app/startServer.js
 COPY --from=builder /app/scripts/_shared /app/scripts/_shared
 
+### [修改 2/4] 注入入口脚本
+COPY entrypoint.sh /app/entrypoint.sh
+
 RUN set -e && \
-    addgroup -S -g 1001 nodejs && \
-    adduser -D -G nodejs -H -S -h /app -u 1001 nextjs && \
+    ### [修改 3/4] 强制指定 UID/GID 为 1000
+    addgroup -S -g 1000 nodejs && \
+    adduser -D -G nodejs -H -S -h /app -u 1000 nextjs && \
+    ### [修改 3/4 续] 赋予执行权限并递归修改所有者为 UID 1000
+    chmod +x /app/cloudflared /app/entrypoint.sh && \
     chown -R nextjs:nodejs /app /etc/proxychains4.conf
 
 ## Production image, copy all the files and run next
@@ -345,6 +354,7 @@ USER nextjs
 
 EXPOSE 3210/tcp
 
-ENTRYPOINT ["/bin/node"]
+### [修改 4/4] 替换 ENTRYPOINT 并显式声明 CMD
+ENTRYPOINT ["/app/entrypoint.sh"]
 
-CMD ["/app/startServer.js"]
+CMD ["/bin/node", "/app/startServer.js"]
