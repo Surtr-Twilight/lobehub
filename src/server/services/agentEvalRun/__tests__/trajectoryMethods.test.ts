@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getTestDB } from '@/database/core/getTestDB';
-import {
-  AgentEvalBenchmarkModel,
-  AgentEvalRunModel,
-  AgentEvalRunTopicModel,
-} from '@/database/models/agentEval';
+import { AgentEvalBenchmarkModel, AgentEvalRunTopicModel } from '@/database/models/agentEval';
 import {
   agentEvalBenchmarks,
   agentEvalDatasets,
@@ -94,8 +90,8 @@ async function setupTrajectoryChain(opts?: {
     })
     .returning();
 
-  const runModel = new AgentEvalRunModel(serverDB, userId);
-  const run = await runModel.create({
+  const service = new AgentEvalRunService(serverDB, userId);
+  const run = await service.createRun({
     datasetId: dataset.id,
     name: 'Trajectory Run',
     targetAgentId: opts?.targetAgentId ?? undefined,
@@ -312,7 +308,10 @@ describe('AgentEvalRunService', () => {
     });
 
     it('should use correct topic title with sortOrder and input', async () => {
-      const { run, testCase } = await setupTrajectoryChain();
+      const { run, testCase } = await setupTrajectoryChain({
+        input: 'A very long input that should be truncated at some point',
+        sortOrder: 4,
+      });
 
       mockExecAgent.mockResolvedValue({});
 

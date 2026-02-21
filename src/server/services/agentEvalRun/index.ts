@@ -184,6 +184,44 @@ export class AgentEvalRunService {
     return { retryCount: errorTopics.length };
   }
 
+  async retrySingleCase(runId: string, testCaseId: string) {
+    const run = await this.runModel.findById(runId);
+    if (!run) throw new Error('Run not found');
+
+    const runTopic = await this.runTopicModel.findByRunAndTestCase(runId, testCaseId);
+    if (!runTopic) throw new Error('RunTopic not found');
+
+    // 1. Delete old RunTopic
+    await this.runTopicModel.deleteByRunAndTestCase(runId, testCaseId);
+
+    // 2. Delete old Topic
+    if (runTopic.topicId) {
+      await this.topicModel.batchDelete([runTopic.topicId]);
+    }
+
+    // 3. Create new Topic
+    const [newTopic] = await this.topicModel.batchCreate([
+      {
+        agentId: run.targetAgentId ?? undefined,
+        title: `[Eval Case #${(runTopic.testCase?.sortOrder ?? 0) + 1}] ${runTopic.testCase?.content?.input?.slice(0, 50) || 'Test Case'}...`,
+        trigger: 'eval',
+      },
+    ]);
+
+    // 4. Create new RunTopic with pending status
+    await this.runTopicModel.batchCreate([
+      {
+        runId,
+        status: 'pending' as const,
+        testCaseId,
+        topicId: newTopic.id,
+      },
+    ]);
+
+    // 5. Set run status to running
+    await this.runModel.update(runId, { status: 'running' });
+  }
+
   async loadTrajectoryData(runId: string, testCaseId: string) {
     const run = await this.runModel.findById(runId);
     if (!run) return { error: 'Run not found' as const };

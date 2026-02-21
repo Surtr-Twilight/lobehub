@@ -179,6 +179,7 @@
   "run.actions.delete": "删除",
   "run.actions.delete.confirm": "确定要删除此评测吗？",
   "run.actions.edit": "编辑",
+  "run.actions.retryCase": "重试",
   "run.actions.retryErrors": "重试错误用例",
   "run.actions.retryErrors.confirm": "将重新运行所有错误和超时的用例。已通过和未通过的用例不受影响。",
   "run.actions.run": "执行",

@@ -29,6 +29,7 @@ export interface RunAction {
   refreshDatasetRuns: (datasetId: string) => Promise<void>;
   refreshRunDetail: (id: string) => Promise<void>;
   refreshRuns: (benchmarkId?: string) => Promise<void>;
+  retryRunCase: (runId: string, testCaseId: string) => Promise<void>;
   retryRunErrors: (id: string) => Promise<void>;
   startRun: (id: string, force?: boolean) => Promise<void>;
   updateRun: (params: {
@@ -126,6 +127,11 @@ export const createRunSlice: StateCreator<
       // Revalidate all benchmark-level run list entries
       await mutate((key) => Array.isArray(key) && key[0] === FETCH_RUNS_KEY);
     }
+  },
+
+  retryRunCase: async (runId, testCaseId) => {
+    await agentEvalService.retryRunCase(runId, testCaseId);
+    await get().refreshRunDetail(runId);
   },
 
   retryRunErrors: async (id) => {

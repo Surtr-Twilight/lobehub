@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getTestDB } from '@/database/core/getTestDB';
 import {
@@ -19,6 +19,13 @@ import {
   users,
 } from '@/database/schemas';
 import { AgentEvalRunService } from '@/server/services/agentEvalRun';
+
+// Mock AgentRuntimeService to avoid ApiKeyManager env var access at module level
+vi.mock('@/server/services/agentRuntime/AgentRuntimeService', () => ({
+  AgentRuntimeService: vi.fn().mockImplementation(() => ({
+    interruptOperation: vi.fn().mockResolvedValue(true),
+  })),
+}));
 
 const serverDB = await getTestDB();
 

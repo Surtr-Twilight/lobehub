@@ -160,6 +160,19 @@ export class AgentEvalRunTopicModel {
       .returning();
   };
 
+  deleteByRunAndTestCase = async (runId: string, testCaseId: string) => {
+    return this.db
+      .delete(agentEvalRunTopics)
+      .where(
+        and(
+          eq(agentEvalRunTopics.userId, this.userId),
+          eq(agentEvalRunTopics.runId, runId),
+          eq(agentEvalRunTopics.testCaseId, testCaseId),
+        ),
+      )
+      .returning();
+  };
+
   /**
    * Delete error/timeout RunTopics for a run, returning deleted rows
    */

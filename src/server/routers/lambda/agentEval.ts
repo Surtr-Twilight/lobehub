@@ -778,6 +778,30 @@ export const agentEvalRouter = router({
       return { retryCount, runId: input.id, success: true };
     }),
 
+  retryRunCase: agentEvalProcedure
+    .input(z.object({ runId: z.string(), testCaseId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const run = await ctx.runModel.findById(input.runId);
+      if (!run) throw new TRPCError({ code: 'NOT_FOUND', message: 'Run not found' });
+
+      if (!['completed', 'failed', 'aborted', 'running'].includes(run.status)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `Cannot retry case: run status=${run.status}`,
+        });
+      }
+
+      await ctx.runService.retrySingleCase(input.runId, input.testCaseId);
+
+      await AgentEvalRunWorkflow.triggerExecuteTestCase({
+        runId: input.runId,
+        testCaseId: input.testCaseId,
+        userId: ctx.userId,
+      });
+
+      return { runId: input.runId, success: true, testCaseId: input.testCaseId };
+    }),
+
   /**
    * Get real-time progress of a running evaluation
    */
